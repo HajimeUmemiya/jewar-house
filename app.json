@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Jewar-house",
+    "slug": "Jewar-house",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "myapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/favicon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#1e3a8a"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.yourcompany.goldrates"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#1e3a8a"
+      },
+      "package": "com.yourcompany.goldrates"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "tsconfigPaths": true
+    },
+    "web": {
+      "bundler": "metro"
+    }
+  }
+}
