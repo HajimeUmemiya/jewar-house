@@ -33,11 +33,11 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#1A237E',
-        tabBarInactiveTintColor: '#8B5A3C',
+        tabBarActiveTintColor: '#FFFFFF',
+        tabBarInactiveTintColor: 'rgba(255, 255, 255, 0.6)',
         tabBarStyle: {
-          backgroundColor: '#FFFFFF',
-          borderTopColor: '#E8EAF6',
+          backgroundColor: '#1A237E',
+          borderTopColor: '#283593',
           borderTopWidth: 1,
           paddingTop: isSmallDevice ? 10 : 12,
           paddingBottom: Platform.OS === 'ios' ? (isSmallDevice ? 25 : 30) : (isSmallDevice ? 10 : 12),
@@ -46,8 +46,8 @@ export default function TabLayout() {
           elevation: 8,
           shadowColor: '#1A237E',
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.1,
-          shadowRadius: 4,
+          shadowOpacity: 0.3,
+          shadowRadius: 8,
         },
         tabBarLabelStyle: {
           fontFamily: 'Poppins-Medium',
@@ -79,8 +79,13 @@ export default function TabLayout() {
         name="index"
         options={{
           title: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Home size={getIconSize()} color={color} strokeWidth={2.5} />
+          tabBarIcon: ({ color, focused }) => (
+            <Home 
+              size={getIconSize()} 
+              color={focused ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'} 
+              strokeWidth={focused ? 3 : 2.5}
+              fill={focused ? 'rgba(255, 255, 255, 0.1)' : 'transparent'}
+            />
           ),
         }}
       />
@@ -88,8 +93,13 @@ export default function TabLayout() {
         name="calculator"
         options={{
           title: 'Calculator',
-          tabBarIcon: ({ color, size }) => (
-            <Calculator size={getIconSize()} color={color} strokeWidth={2.5} />
+          tabBarIcon: ({ color, focused }) => (
+            <Calculator 
+              size={getIconSize()} 
+              color={focused ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'} 
+              strokeWidth={focused ? 3 : 2.5}
+              fill={focused ? 'rgba(255, 255, 255, 0.1)' : 'transparent'}
+            />
           ),
         }}
       />
@@ -97,8 +107,13 @@ export default function TabLayout() {
         name="merchant-info"
         options={{
           title: isSmallDevice ? 'Info' : 'Merchant Info',
-          tabBarIcon: ({ color, size }) => (
-            <Info size={getIconSize()} color={color} strokeWidth={2.5} />
+          tabBarIcon: ({ color, focused }) => (
+            <Info 
+              size={getIconSize()} 
+              color={focused ? '#FFFFFF' : 'rgba(255, 255, 255, 0.6)'} 
+              strokeWidth={focused ? 3 : 2.5}
+              fill={focused ? 'rgba(255, 255, 255, 0.1)' : 'transparent'}
+            />
           ),
         }}
       />
