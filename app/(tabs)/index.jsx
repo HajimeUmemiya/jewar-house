@@ -345,6 +345,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: getResponsiveSize(8, 10, 12),
+    marginBottom: 20,
   },
   titleAccent: {
     width: getResponsiveSize(18, 20, 24),
