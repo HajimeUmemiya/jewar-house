@@ -343,7 +343,7 @@ const styles = StyleSheet.create({
   },
   sectionTitleContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
+    r: 'center',
     gap: getResponsiveSize(8, 10, 12),
     marginBottom: 20,
   },
