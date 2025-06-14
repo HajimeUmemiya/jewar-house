@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ScrollView, Modal, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, Folder, X, MapPin, MessageCircle } from 'lucide-react-native';
+import { ChevronRight, X, MapPin, MessageCircle, Package } from 'lucide-react-native';
 import { Linking } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -31,6 +31,8 @@ const jewelleryData = {
       {
         id: 'rings',
         name: 'Rings',
+        icon: '💍',
+        productCount: 8,
         products: [
           {
             id: 1,
@@ -55,6 +57,8 @@ const jewelleryData = {
       {
         id: 'tops',
         name: 'Tops',
+        icon: '👂',
+        productCount: 12,
         products: [
           {
             id: 3,
@@ -79,6 +83,8 @@ const jewelleryData = {
       {
         id: 'bangles',
         name: 'Bangles',
+        icon: '⚪',
+        productCount: 15,
         products: [
           {
             id: 5,
@@ -103,6 +109,8 @@ const jewelleryData = {
       {
         id: 'necklaces',
         name: 'Necklaces',
+        icon: '📿',
+        productCount: 20,
         products: [
           {
             id: 7,
@@ -127,6 +135,8 @@ const jewelleryData = {
       {
         id: 'miscellaneous',
         name: 'Miscellaneous',
+        icon: '✨',
+        productCount: 10,
         products: [
           {
             id: 9,
@@ -157,6 +167,8 @@ const jewelleryData = {
       {
         id: 'rings',
         name: 'Rings',
+        icon: '💎',
+        productCount: 6,
         products: [
           {
             id: 11,
@@ -181,6 +193,8 @@ const jewelleryData = {
       {
         id: 'earrings',
         name: 'Earrings',
+        icon: '💫',
+        productCount: 8,
         products: [
           {
             id: 13,
@@ -205,6 +219,8 @@ const jewelleryData = {
       {
         id: 'bracelet',
         name: 'Bracelet',
+        icon: '🔗',
+        productCount: 4,
         products: [
           {
             id: 15,
@@ -220,6 +236,8 @@ const jewelleryData = {
       {
         id: 'bangles',
         name: 'Bangles',
+        icon: '⭕',
+        productCount: 5,
         products: [
           {
             id: 16,
@@ -235,6 +253,8 @@ const jewelleryData = {
       {
         id: 'necklace-set',
         name: 'Necklace Set',
+        icon: '👑',
+        productCount: 7,
         products: [
           {
             id: 17,
@@ -256,6 +276,8 @@ const jewelleryData = {
       {
         id: 'bichua',
         name: 'Bichua',
+        icon: '🦶',
+        productCount: 6,
         products: [
           {
             id: 18,
@@ -280,6 +302,8 @@ const jewelleryData = {
       {
         id: 'paajeb',
         name: 'Paajeb',
+        icon: '🦵',
+        productCount: 8,
         products: [
           {
             id: 20,
@@ -304,6 +328,8 @@ const jewelleryData = {
       {
         id: 'god-idols',
         name: 'God Idols',
+        icon: '🕉️',
+        productCount: 12,
         products: [
           {
             id: 22,
@@ -328,6 +354,8 @@ const jewelleryData = {
       {
         id: 'bartan',
         name: 'Bartan',
+        icon: '🍽️',
+        productCount: 10,
         products: [
           {
             id: 24,
@@ -353,38 +381,12 @@ const jewelleryData = {
   },
 };
 
-// New Arrival category (separate from toggle system)
-const newArrivalCategory = {
-  id: 'new-arrival',
-  title: 'NEW ARRIVAL',
-  products: [
-    {
-      id: 26,
-      name: 'NAWABI',
-      designNo: 'NC1',
-      grossWt: '25',
-      price: '₹2,25,000',
-      purity: '22KT',
-      image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
-      description: 'Exquisite Nawabi design featuring traditional patterns and premium 22KT gold craftsmanship.',
-    },
-    {
-      id: 27,
-      name: 'LONG SET',
-      designNo: 'LS-4',
-      grossWt: '150',
-      price: '₹12,50,000',
-      purity: '22KT',
-      image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
-      description: 'Stunning long set with intricate design work and premium quality 22KT gold.',
-    },
-  ],
-};
-
 export default function CategorySection() {
   const [activeToggle, setActiveToggle] = useState('gold');
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [productModalVisible, setProductModalVisible] = useState(false);
 
   const handleStoreLocation = async () => {
     const url = 'https://maps.app.goo.gl/LDYyCGQ3cAxQZheM7?g_st=aw';
@@ -405,13 +407,24 @@ export default function CategorySection() {
     }
   };
 
+  const openCategoryModal = (category) => {
+    setSelectedCategory(category);
+    setCategoryModalVisible(true);
+  };
+
+  const closeCategoryModal = () => {
+    setCategoryModalVisible(false);
+    setSelectedCategory(null);
+  };
+
   const openProductModal = (product) => {
     setSelectedProduct(product);
-    setModalVisible(true);
+    setProductModalVisible(true);
+    setCategoryModalVisible(false);
   };
 
   const closeProductModal = () => {
-    setModalVisible(false);
+    setProductModalVisible(false);
     setSelectedProduct(null);
   };
 
@@ -442,99 +455,112 @@ export default function CategorySection() {
     </TouchableOpacity>
   );
 
-  const renderFolderCategory = (category) => (
-    <View key={category.id} style={styles.folderContainer}>
-      <View style={styles.folderHeader}>
-        <LinearGradient
-          colors={['#1A237E', '#283593']}
-          style={styles.folderHeaderGradient}
-        >
-          <Folder size={getResponsiveSize(18, 20, 22)} color="#D4AF37" />
-          <Text style={styles.folderTitle}>{category.name}</Text>
-          <Text style={styles.productCount}>({category.products.length})</Text>
-        </LinearGradient>
-      </View>
-      
-      <View style={styles.productsGrid}>
-        {category.products.map((product) => (
-          <TouchableOpacity
-            key={product.id}
-            style={styles.productItem}
-            onPress={() => openProductModal(product)}
-            activeOpacity={0.8}
+  const renderCategoryCard = (category) => (
+    <TouchableOpacity
+      key={category.id}
+      style={styles.categoryCard}
+      onPress={() => openCategoryModal(category)}
+      activeOpacity={0.8}
+    >
+      <LinearGradient
+        colors={['#FFFFFF', '#FAFAFA']}
+        style={styles.categoryGradient}
+      >
+        <View style={styles.categoryIconContainer}>
+          <LinearGradient
+            colors={['#1A237E', '#283593']}
+            style={styles.categoryIconBackground}
           >
-            <LinearGradient
-              colors={['#FFFFFF', '#FAFAFA']}
-              style={styles.productGradient}
-            >
-              <Image source={{ uri: product.image }} style={styles.productImage} />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>
-                  {product.name}
-                </Text>
-                <Text style={styles.productPrice}>{product.price}</Text>
-                <View style={styles.productMeta}>
-                  <Text style={styles.productWeight}>{product.weight}</Text>
-                  <Text style={styles.productPurity}>{product.purity}</Text>
-                </View>
-              </View>
-              <ChevronRight size={getResponsiveSize(16, 18, 20)} color="#6B7280" />
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
-      </View>
-    </View>
+            <Text style={styles.categoryIcon}>{category.icon}</Text>
+          </LinearGradient>
+        </View>
+        
+        <View style={styles.categoryInfo}>
+          <Text style={styles.categoryName}>{category.name}</Text>
+          <Text style={styles.categoryCount}>
+            {category.productCount} Products
+          </Text>
+        </View>
+        
+        <View style={styles.categoryArrow}>
+          <ChevronRight size={getResponsiveSize(20, 22, 24)} color="#6B7280" />
+        </View>
+      </LinearGradient>
+    </TouchableOpacity>
   );
 
-  const renderNewArrivalSection = () => (
-    <View style={[styles.folderContainer, styles.newArrivalContainer]}>
-      <View style={styles.folderHeader}>
-        <LinearGradient
-          colors={['#1A237E', '#283593']}
-          style={styles.folderHeaderGradient}
-        >
-          <Folder size={getResponsiveSize(18, 20, 22)} color="#D4AF37" />
-          <Text style={styles.folderTitle}>{newArrivalCategory.title}</Text>
-          <Text style={styles.productCount}>({newArrivalCategory.products.length})</Text>
-        </LinearGradient>
-      </View>
-      
-      <View style={styles.productsGrid}>
-        {newArrivalCategory.products.map((product) => (
-          <TouchableOpacity
-            key={product.id}
-            style={styles.productItem}
-            onPress={() => openProductModal(product)}
-            activeOpacity={0.8}
+  const renderCategoryModal = () => (
+    <Modal
+      animationType="slide"
+      transparent={true}
+      visible={categoryModalVisible}
+      onRequestClose={closeCategoryModal}
+    >
+      <View style={styles.modalOverlay}>
+        <Pressable style={styles.modalBackdrop} onPress={closeCategoryModal} />
+        <View style={styles.modalContainer}>
+          <LinearGradient
+            colors={['#FFFFFF', '#FAFAFA']}
+            style={styles.modalGradient}
           >
-            <LinearGradient
-              colors={['#FFFFFF', '#FAFAFA']}
-              style={styles.productGradient}
-            >
-              <Image source={{ uri: product.image }} style={styles.productImage} />
-              <View style={styles.productInfo}>
-                <Text style={styles.productName} numberOfLines={1}>
-                  {product.name}
-                </Text>
-                <Text style={styles.productPrice}>{product.price}</Text>
-                <View style={styles.productMeta}>
-                  <Text style={styles.productWeight}>{product.grossWt}g</Text>
-                  <Text style={styles.productPurity}>{product.purity}</Text>
+            {selectedCategory && (
+              <>
+                <View style={styles.modalHeader}>
+                  <View style={styles.modalTitleContainer}>
+                    <Text style={styles.modalCategoryIcon}>{selectedCategory.icon}</Text>
+                    <Text style={styles.modalTitle}>{selectedCategory.name}</Text>
+                  </View>
+                  <TouchableOpacity
+                    style={styles.closeButton}
+                    onPress={closeCategoryModal}
+                  >
+                    <X size={getResponsiveSize(20, 22, 24)} color="#6B7280" />
+                  </TouchableOpacity>
                 </View>
-              </View>
-              <ChevronRight size={getResponsiveSize(16, 18, 20)} color="#6B7280" />
-            </LinearGradient>
-          </TouchableOpacity>
-        ))}
+
+                <ScrollView style={styles.modalContent}>
+                  <View style={styles.productsGrid}>
+                    {selectedCategory.products.map((product) => (
+                      <TouchableOpacity
+                        key={product.id}
+                        style={styles.productCard}
+                        onPress={() => openProductModal(product)}
+                        activeOpacity={0.8}
+                      >
+                        <LinearGradient
+                          colors={['#FFFFFF', '#FAFAFA']}
+                          style={styles.productGradient}
+                        >
+                          <Image source={{ uri: product.image }} style={styles.productImage} />
+                          <View style={styles.productInfo}>
+                            <Text style={styles.productName} numberOfLines={1}>
+                              {product.name}
+                            </Text>
+                            <Text style={styles.productPrice}>{product.price}</Text>
+                            <View style={styles.productMeta}>
+                              <Text style={styles.productWeight}>{product.weight}</Text>
+                              <Text style={styles.productPurity}>{product.purity}</Text>
+                            </View>
+                          </View>
+                          <ChevronRight size={getResponsiveSize(16, 18, 20)} color="#6B7280" />
+                        </LinearGradient>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </>
+            )}
+          </LinearGradient>
+        </View>
       </View>
-    </View>
+    </Modal>
   );
 
   const renderProductModal = () => (
     <Modal
       animationType="slide"
       transparent={true}
-      visible={modalVisible}
+      visible={productModalVisible}
       onRequestClose={closeProductModal}
     >
       <View style={styles.modalOverlay}>
@@ -566,20 +592,12 @@ export default function CategorySection() {
                     <View style={styles.modalProductSpecs}>
                       <View style={styles.specRow}>
                         <Text style={styles.specLabel}>Weight:</Text>
-                        <Text style={styles.specValue}>
-                          {selectedProduct.weight || selectedProduct.grossWt + 'g'}
-                        </Text>
+                        <Text style={styles.specValue}>{selectedProduct.weight}</Text>
                       </View>
                       <View style={styles.specRow}>
                         <Text style={styles.specLabel}>Purity:</Text>
                         <Text style={styles.specValue}>{selectedProduct.purity}</Text>
                       </View>
-                      {selectedProduct.designNo && (
-                        <View style={styles.specRow}>
-                          <Text style={styles.specLabel}>Design No:</Text>
-                          <Text style={styles.specValue}>{selectedProduct.designNo}</Text>
-                        </View>
-                      )}
                     </View>
                     
                     <Text style={styles.modalProductDescription}>
@@ -634,15 +652,17 @@ export default function CategorySection() {
         </View>
       </View>
 
-      {/* Active Categories */}
+      {/* Categories Grid */}
       <View style={styles.categoriesSection}>
-        {jewelleryData[activeToggle].categories.map((category) => 
-          renderFolderCategory(category)
-        )}
+        <View style={styles.categoriesGrid}>
+          {jewelleryData[activeToggle].categories.map((category) => 
+            renderCategoryCard(category)
+          )}
+        </View>
       </View>
 
-      {/* New Arrival Section */}
-      {renderNewArrivalSection()}
+      {/* Category Modal */}
+      {renderCategoryModal()}
 
       {/* Product Modal */}
       {renderProductModal()}
@@ -708,9 +728,11 @@ const styles = StyleSheet.create({
   },
   categoriesSection: {
     flex: 1,
-    gap: getResponsiveSize(16, 18, 20),
   },
-  folderContainer: {
+  categoriesGrid: {
+    gap: getResponsiveSize(12, 14, 16),
+  },
+  categoryCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: getResponsiveSize(12, 14, 16),
     overflow: 'hidden',
@@ -722,86 +744,48 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E8EAF6',
   },
-  newArrivalContainer: {
-    marginTop: getResponsiveSize(24, 28, 32),
-  },
-  folderHeader: {
-    overflow: 'hidden',
-  },
-  folderHeaderGradient: {
+  categoryGradient: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: getResponsiveSize(12, 14, 16),
-    paddingHorizontal: getResponsiveSize(16, 18, 20),
-    gap: getResponsiveSize(8, 10, 12),
+    padding: getResponsiveSize(16, 18, 20),
+    gap: getResponsiveSize(16, 18, 20),
   },
-  folderTitle: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(16),
-    color: '#FFFFFF',
-    letterSpacing: 0.5,
-    flex: 1,
-  },
-  productCount: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
-    color: 'rgba(255, 255, 255, 0.8)',
-  },
-  productsGrid: {
-    padding: getResponsiveSize(12, 14, 16),
-    backgroundColor: '#FAFAFA',
-    gap: getResponsiveSize(8, 10, 12),
-  },
-  productItem: {
-    borderRadius: getResponsiveSize(8, 10, 12),
+  categoryIconContainer: {
+    borderRadius: getResponsiveSize(25, 28, 32),
     overflow: 'hidden',
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    borderWidth: 0.5,
-    borderColor: '#E8EAF6',
+    elevation: 3,
+    shadowColor: '#1A237E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
   },
-  productGradient: {
-    flexDirection: 'row',
+  categoryIconBackground: {
+    width: getResponsiveSize(50, 56, 64),
+    height: getResponsiveSize(50, 56, 64),
+    borderRadius: getResponsiveSize(25, 28, 32),
+    justifyContent: 'center',
     alignItems: 'center',
-    padding: getResponsiveSize(12, 14, 16),
-    gap: getResponsiveSize(12, 14, 16),
   },
-  productImage: {
-    width: getResponsiveSize(60, 70, 80),
-    height: getResponsiveSize(60, 70, 80),
-    borderRadius: getResponsiveSize(8, 10, 12),
+  categoryIcon: {
+    fontSize: getResponsiveSize(24, 28, 32),
   },
-  productInfo: {
+  categoryInfo: {
     flex: 1,
     gap: getResponsiveSize(4, 5, 6),
   },
-  productName: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(14),
+  categoryName: {
+    fontFamily: 'CrimsonPro-SemiBold',
+    fontSize: getResponsiveFontSize(18),
     color: '#1A237E',
-    letterSpacing: 0.3,
+    letterSpacing: 0.5,
   },
-  productPrice: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(16),
-    color: '#D4AF37',
-  },
-  productMeta: {
-    flexDirection: 'row',
-    gap: getResponsiveSize(8, 10, 12),
-  },
-  productWeight: {
+  categoryCount: {
     fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
+    fontSize: getResponsiveFontSize(14),
     color: '#6B7280',
   },
-  productPurity: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
-    color: '#6B7280',
+  categoryArrow: {
+    padding: getResponsiveSize(4, 5, 6),
   },
   // Modal Styles
   modalOverlay: {
@@ -817,7 +801,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    maxHeight: '80%',
+    maxHeight: '85%',
     borderTopLeftRadius: getResponsiveSize(20, 22, 24),
     borderTopRightRadius: getResponsiveSize(20, 22, 24),
     overflow: 'hidden',
@@ -839,6 +823,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E8EAF6',
   },
+  modalTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: getResponsiveSize(12, 14, 16),
+  },
+  modalCategoryIcon: {
+    fontSize: getResponsiveSize(24, 26, 28),
+  },
   modalTitle: {
     fontFamily: 'CrimsonPro-SemiBold',
     fontSize: getResponsiveFontSize(20),
@@ -853,6 +845,61 @@ const styles = StyleSheet.create({
   modalContent: {
     flex: 1,
     paddingHorizontal: getResponsiveSize(20, 22, 24),
+  },
+  productsGrid: {
+    paddingVertical: getResponsiveSize(16, 18, 20),
+    gap: getResponsiveSize(12, 14, 16),
+  },
+  productCard: {
+    borderRadius: getResponsiveSize(12, 14, 16),
+    overflow: 'hidden',
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    borderWidth: 0.5,
+    borderColor: '#E8EAF6',
+  },
+  productGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: getResponsiveSize(12, 14, 16),
+    gap: getResponsiveSize(12, 14, 16),
+  },
+  productImage: {
+    width: getResponsiveSize(70, 80, 90),
+    height: getResponsiveSize(70, 80, 90),
+    borderRadius: getResponsiveSize(8, 10, 12),
+  },
+  productInfo: {
+    flex: 1,
+    gap: getResponsiveSize(4, 5, 6),
+  },
+  productName: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: getResponsiveFontSize(16),
+    color: '#1A237E',
+    letterSpacing: 0.3,
+  },
+  productPrice: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: getResponsiveFontSize(16),
+    color: '#D4AF37',
+  },
+  productMeta: {
+    flexDirection: 'row',
+    gap: getResponsiveSize(8, 10, 12),
+  },
+  productWeight: {
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(12),
+    color: '#6B7280',
+  },
+  productPurity: {
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(12),
+    color: '#6B7280',
   },
   modalImage: {
     width: '100%',
