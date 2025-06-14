@@ -378,6 +378,7 @@ export default function CategorySection() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    marginBottom: 10, // Added 10px bottom margin
   },
   toggleSection: {
     marginBottom: getResponsiveSize(20, 24, 28),
