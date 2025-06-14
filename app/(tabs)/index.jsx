@@ -19,6 +19,7 @@ import { format } from 'date-fns';
 import MetalRateCard from '@/components/MetalRateCard';
 import Header from '@/components/Header';
 import CategorySection from '@/components/CategorySection';
+import JewelleryCarousel from '@/components/JewelleryCarousel';
 
 // Services
 import { fetchRates, subscribeToRates } from '@/services/rateService';
@@ -249,6 +250,9 @@ export default function HomeScreen() {
             </View>
           </View>
 
+          {/* Featured Collections Carousel */}
+          <JewelleryCarousel />
+
           {/* Product Categories Section */}
           <View style={styles.productsSection}>
             <View style={styles.sectionTitleContainer}>
@@ -407,7 +411,6 @@ const styles = StyleSheet.create({
   },
   // Products Section Styles
   productsSection: {
-    marginTop: getResponsiveMargin(),
     flex: 1,
   },
 });
