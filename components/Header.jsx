@@ -46,7 +46,7 @@ export default function Header() {
       <View style={styles.header}>
         <View style={styles.titleContainer}>
           <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit>
-            {isSmallDevice ? 'Jewar House' : 'Jewar House'}
+            Jewar House
           </Text>
         </View>
         <View style={styles.actions}>
