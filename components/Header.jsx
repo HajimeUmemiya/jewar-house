@@ -45,11 +45,9 @@ export default function Header() {
     >
       <View style={styles.header}>
         <View style={styles.titleContainer}>
-          <View style={styles.titleAccent} />
           <Text style={styles.title} numberOfLines={1} adjustsFontSizeToFit>
             {isSmallDevice ? 'Jewar House' : 'Jewar House'}
           </Text>
-          <View style={styles.titleAccent} />
         </View>
         <View style={styles.actions}>
           <TouchableOpacity style={styles.actionButton} onPress={handleSearch}>
@@ -86,17 +84,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: getResponsivePadding(),
   },
   titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: getResponsiveSize(8, 10, 12),
     flex: 1,
     marginRight: getResponsiveSize(8, 10, 12),
-  },
-  titleAccent: {
-    width: getResponsiveSize(15, 17, 20),
-    height: 2,
-    backgroundColor: '#D4AF37',
-    borderRadius: 1,
   },
   title: {
     fontFamily: 'CrimsonPro-SemiBold',
@@ -106,7 +95,6 @@ const styles = StyleSheet.create({
     textShadowColor: 'rgba(26, 35, 126, 0.1)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
-    flex: 1,
     textAlign: 'center',
   },
   actions: {
