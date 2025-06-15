@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   ScrollView,
   Dimensions,
+  Modal,
+  Pressable,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -67,7 +69,7 @@ export default function CalculatorScreen() {
   const [solitaireWeightPrice, setSolitaireWeightPrice] = useState(80000);
   const [colorStoneWeight, setColorStoneWeight] = useState('');
   
-  // Dropdown states
+  // Dropdown states - using modal approach
   const [showDiamondDropdown, setShowDiamondDropdown] = useState(false);
   const [showSolitaireDropdown, setShowSolitaireDropdown] = useState(false);
   
@@ -232,35 +234,58 @@ export default function CalculatorScreen() {
     return rates[metalType][purity] || 0;
   };
 
-  const renderDropdown = (options, selectedValue, onSelect, isVisible, setVisible) => (
-    <View style={styles.dropdownContainer}>
-      <TouchableOpacity
-        style={styles.dropdownButton}
-        onPress={() => setVisible(!isVisible)}
+  // Modal-based dropdown component
+  const renderModalDropdown = (options, selectedValue, onSelect, isVisible, setVisible, title) => (
+    <Modal
+      animationType="fade"
+      transparent={true}
+      visible={isVisible}
+      onRequestClose={() => setVisible(false)}
+    >
+      <Pressable 
+        style={styles.modalOverlay} 
+        onPress={() => setVisible(false)}
       >
-        <Text style={styles.dropdownButtonText}>
-          {options.find(opt => opt.value === selectedValue)?.label || 'Select'}
-        </Text>
-        <ChevronDown size={getResponsiveSize(16, 17, 18)} color="#6B7280" />
-      </TouchableOpacity>
-      
-      {isVisible && (
-        <View style={styles.dropdownMenu}>
-          {options.map((option) => (
-            <TouchableOpacity
-              key={option.value}
-              style={styles.dropdownItem}
-              onPress={() => {
-                onSelect(option.value);
-                setVisible(false);
-              }}
-            >
-              <Text style={styles.dropdownItemText}>{option.label}</Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.modalContainer}>
+          <LinearGradient
+            colors={['#FFFFFF', '#FAFAFA']}
+            style={styles.modalGradient}
+          >
+            <Text style={styles.modalTitle}>{title}</Text>
+            <View style={styles.modalOptionsContainer}>
+              {options.map((option) => (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.modalOption,
+                    selectedValue === option.value && styles.modalOptionSelected
+                  ]}
+                  onPress={() => {
+                    onSelect(option.value);
+                    setVisible(false);
+                  }}
+                >
+                  <LinearGradient
+                    colors={selectedValue === option.value 
+                      ? ['#E8E3D3', '#D4D0C4'] 
+                      : ['#FFFFFF', '#FAFAFA']
+                    }
+                    style={styles.modalOptionGradient}
+                  >
+                    <Text style={[
+                      styles.modalOptionText,
+                      selectedValue === option.value && styles.modalOptionTextSelected
+                    ]}>
+                      {option.label}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </LinearGradient>
         </View>
-      )}
-    </View>
+      </Pressable>
+    </Modal>
   );
 
   return (
@@ -418,13 +443,15 @@ export default function CalculatorScreen() {
                         placeholderTextColor="#9CA3AF"
                       />
                     </View>
-                    {renderDropdown(
-                      diamondWeightOptions,
-                      diamondWeightPrice,
-                      setDiamondWeightPrice,
-                      showDiamondDropdown,
-                      setShowDiamondDropdown
-                    )}
+                    <TouchableOpacity
+                      style={styles.dropdownButton}
+                      onPress={() => setShowDiamondDropdown(true)}
+                    >
+                      <Text style={styles.dropdownButtonText}>
+                        {diamondWeightOptions.find(opt => opt.value === diamondWeightPrice)?.label || 'Select'}
+                      </Text>
+                      <ChevronDown size={getResponsiveSize(16, 17, 18)} color="#6B7280" />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
@@ -441,13 +468,15 @@ export default function CalculatorScreen() {
                         placeholderTextColor="#9CA3AF"
                       />
                     </View>
-                    {renderDropdown(
-                      solitaireWeightOptions,
-                      solitaireWeightPrice,
-                      setSolitaireWeightPrice,
-                      showSolitaireDropdown,
-                      setShowSolitaireDropdown
-                    )}
+                    <TouchableOpacity
+                      style={styles.dropdownButton}
+                      onPress={() => setShowSolitaireDropdown(true)}
+                    >
+                      <Text style={styles.dropdownButtonText}>
+                        {solitaireWeightOptions.find(opt => opt.value === solitaireWeightPrice)?.label || 'Select'}
+                      </Text>
+                      <ChevronDown size={getResponsiveSize(16, 17, 18)} color="#6B7280" />
+                    </TouchableOpacity>
                   </View>
                 </View>
 
@@ -543,6 +572,25 @@ export default function CalculatorScreen() {
           </View>
         </View>
       </ScrollView>
+
+      {/* Modal Dropdowns */}
+      {renderModalDropdown(
+        diamondWeightOptions,
+        diamondWeightPrice,
+        setDiamondWeightPrice,
+        showDiamondDropdown,
+        setShowDiamondDropdown,
+        'Select Diamond Weight Price'
+      )}
+
+      {renderModalDropdown(
+        solitaireWeightOptions,
+        solitaireWeightPrice,
+        setSolitaireWeightPrice,
+        showSolitaireDropdown,
+        setShowSolitaireDropdown,
+        'Select Solitaire Weight Price'
+      )}
     </View>
   );
 }
@@ -634,10 +682,6 @@ const styles = StyleSheet.create({
     color: '#1A237E',
     backgroundColor: '#FFFFFF',
   },
-  dropdownContainer: {
-    position: 'relative',
-    minWidth: getResponsiveSize(100, 110, 120),
-  },
   dropdownButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -653,6 +697,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    minWidth: getResponsiveSize(100, 110, 120),
   },
   dropdownButtonText: {
     fontFamily: 'Inter-Regular',
@@ -660,36 +705,39 @@ const styles = StyleSheet.create({
     color: '#1A237E',
     marginRight: getResponsiveSize(4, 5, 6),
   },
-  dropdownMenu: {
-    position: 'absolute',
-    top: '100%',
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E8EAF6',
-    borderRadius: getResponsiveSize(8, 10, 12),
-    elevation: 8,
+  // Modal Dropdown Styles
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    maxWidth: 300,
+    borderRadius: getResponsiveSize(12, 14, 16),
+    overflow: 'hidden',
+    elevation: 10,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
+    shadowOpacity: 0.3,
     shadowRadius: 8,
-    zIndex: 1000,
-    marginTop: getResponsiveSize(4, 5, 6),
   },
-  dropdownItem: {
-    paddingHorizontal: getResponsiveSize(12, 14, 16),
-    paddingVertical: getResponsiveSize(10, 11, 12),
-    borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+  modalGradient: {
+    padding: getResponsiveSize(20, 22, 24),
   },
-  dropdownItemText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(14),
+  modalTitle: {
+    fontFamily: 'CrimsonPro-SemiBold',
+    fontSize: getResponsiveFontSize(18),
     color: '#1A237E',
+    textAlign: 'center',
+    marginBottom: getResponsiveSize(16, 18, 20),
+    letterSpacing: 0.5,
   },
-  toggleContainer: {
-    flexDirection: 'row',
+  modalOptionsContainer: {
+    gap: getResponsiveSize(8, 10, 12),
+  },
+  modalOption: {
     borderRadius: getResponsiveSize(8, 10, 12),
     overflow: 'hidden',
     elevation: 2,
@@ -698,22 +746,74 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
   },
+  modalOptionSelected: {
+    elevation: 4,
+    shadowOpacity: 0.2,
+  },
+  modalOptionGradient: {
+    paddingVertical: getResponsiveSize(12, 14, 16),
+    paddingHorizontal: getResponsiveSize(16, 18, 20),
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
+  },
+  modalOptionText: {
+    fontFamily: 'Poppins-Regular',
+    fontSize: getResponsiveFontSize(16),
+    color: '#6B7280',
+    textAlign: 'center',
+    letterSpacing: 0.3,
+  },
+  modalOptionTextSelected: {
+    color: '#8B7355',
+    fontFamily: 'Poppins-SemiBold',
+  },
+  toggleContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#FFFFFF',
+    borderRadius: getResponsiveSize(25, 28, 32),
+    padding: getResponsiveSize(4, 5, 6),
+    elevation: 6,
+    shadowColor: '#1A237E',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
+  },
   toggleButton: {
     flex: 1,
+    borderRadius: getResponsiveSize(20, 23, 26),
+    overflow: 'hidden',
+    marginHorizontal: getResponsiveSize(2, 2.5, 3),
+  },
+  toggleButtonActive: {
+    elevation: 4,
+    shadowColor: '#1A237E',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   toggleGradient: {
-    paddingVertical: getResponsiveSize(10, 11, 12),
+    paddingVertical: getResponsiveSize(12, 14, 16),
+    paddingHorizontal: getResponsiveSize(8, 10, 12),
     alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: getResponsiveSize(44, 48, 52),
   },
-  toggleButtonActive: {},
   toggleText: {
-    fontFamily: 'Poppins-Regular',
-    fontSize: getResponsiveFontSize(14),
+    fontFamily: 'Poppins-Medium',
+    fontSize: getResponsiveFontSize(12),
     color: '#6B7280',
     letterSpacing: 0.5,
+    textAlign: 'center',
+    lineHeight: getResponsiveFontSize(16),
   },
   toggleTextActive: {
-    color: 'white',
+    color: '#FFFFFF',
+    fontFamily: 'Poppins-SemiBold',
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   toggleTextActiveSilver: {
     color: '#8B7355',
