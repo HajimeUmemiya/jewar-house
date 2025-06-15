@@ -36,9 +36,13 @@ let currentRates = {
 // Secure API call function
 const fetchRatesFromAPI = async () => {
   try {
-    if (!API_CONFIG.key) {
-      console.warn('API key not configured, using default rates');
-      return currentRates;
+    // Check if API URL is still the placeholder or if API key is missing
+    if (!API_CONFIG.key || API_CONFIG.url === 'https://api.goldrates.com') {
+      console.warn('API key not configured or using placeholder URL, using default rates');
+      return {
+        ...currentRates,
+        lastUpdated: new Date(),
+      };
     }
 
     const response = await fetch(`${API_CONFIG.url}/rates`, {
@@ -142,8 +146,8 @@ const connectWebSocket = () => {
 // Simulation function for development
 const startSimulation = () => {
   const simulateWebSocket = async () => {
-    // Fetch real rates periodically if API is configured
-    if (API_CONFIG.key && Math.random() > 0.7) {
+    // Fetch real rates periodically if API is configured and not using placeholder URL
+    if (API_CONFIG.key && API_CONFIG.url !== 'https://api.goldrates.com' && Math.random() > 0.7) {
       const newRates = await fetchRatesFromAPI();
       currentRates = newRates;
     } else {
@@ -208,8 +212,8 @@ export const subscribeToRates = (callback) => {
 
 // Fetch current rates
 export const fetchRates = async () => {
-  // Try to fetch fresh rates from API if configured
-  if (API_CONFIG.key) {
+  // Try to fetch fresh rates from API if configured and not using placeholder URL
+  if (API_CONFIG.key && API_CONFIG.url !== 'https://api.goldrates.com') {
     const freshRates = await fetchRatesFromAPI();
     currentRates = freshRates;
     return freshRates;
