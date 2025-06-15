@@ -5,6 +5,7 @@ A comprehensive React Native Expo application for displaying live gold and silve
 ## Table of Contents
 
 - [Project Overview](#project-overview)
+- [Environment Setup](#environment-setup)
 - [Project Structure](#project-structure)
 - [Navigation Architecture](#navigation-architecture)
 - [Key Components & Screens](#key-components--screens)
@@ -24,6 +25,68 @@ Jewar House is a production-ready jewellery application that provides:
 - **Product Catalog**: Organized categories for gold, silver, and diamond jewellery
 - **Merchant Information**: Contact details, services, and store information
 - **Responsive Design**: Optimized for all screen sizes from mobile to tablet
+
+## Environment Setup
+
+### Environment Variables
+
+This project uses Expo's environment variable system for secure configuration management.
+
+#### Required Environment Variables
+
+Create a `.env` file in the root directory (copy from `.env.example`):
+
+```bash
+# API Configuration
+EXPO_PUBLIC_API_URL=https://api.goldrates.com
+EXPO_PUBLIC_API_KEY=your_api_key_here
+
+# Rate Service Configuration
+EXPO_PUBLIC_RATE_UPDATE_INTERVAL=2000
+EXPO_PUBLIC_ENABLE_LIVE_RATES=true
+
+# Default Rates (fallback values)
+EXPO_PUBLIC_DEFAULT_GOLD_22KT=85155
+EXPO_PUBLIC_DEFAULT_GOLD_18KT=70375
+EXPO_PUBLIC_DEFAULT_SILVER_BASE=954
+EXPO_PUBLIC_DEFAULT_DIAMOND_18KT=70375
+EXPO_PUBLIC_DEFAULT_DIAMOND_14KT=53800
+```
+
+#### Environment Files
+
+- `.env` - Development environment (not committed to git)
+- `.env.production` - Production environment (not committed to git)
+- `.env.example` - Template file (committed to git)
+
+#### Security Notes
+
+- **NEVER** commit `.env` files containing real API keys to version control
+- Use different API keys for development and production
+- The `.gitignore` file is configured to exclude environment files
+- All sensitive configuration is handled through environment variables
+
+#### API Key Configuration
+
+1. **Development**: Use a development/testing API key in `.env`
+2. **Production**: Set production API key in your deployment environment
+3. **Fallback**: App works with default rates if no API key is provided
+
+### TypeScript Environment Types
+
+Environment variables are typed in `types/env.d.ts` for better development experience:
+
+```typescript
+declare global {
+  namespace NodeJS {
+    interface ProcessEnv {
+      EXPO_PUBLIC_API_URL: string;
+      EXPO_PUBLIC_API_KEY: string;
+      // ... other environment variables
+    }
+  }
+}
+```
 
 ## Project Structure
 
@@ -51,13 +114,20 @@ jewar-house/
 ├── components/                  # Reusable components
 │   ├── Header.jsx              # App header with title & actions
 │   ├── MetalRateCard.jsx       # Individual rate display cards
-│   └── CategorySection.jsx     # Product categories manager
+│   ├── CategorySection.jsx     # Product categories manager
+│   └── JewelleryCarousel.jsx   # Featured collections carousel
 ├── hooks/                      # Custom hooks
 │   └── useFrameworkReady.js    # Framework initialization (CRITICAL)
 ├── services/                   # Data services
-│   └── rateService.js          # Real-time rate management
-└── assets/                     # Static assets
-    └── images/                 # App icons and images
+│   └── rateService.js          # Real-time rate management with API integration
+├── types/                      # TypeScript definitions
+│   └── env.d.ts               # Environment variable types
+├── assets/                     # Static assets
+│   └── images/                 # App icons and images
+├── .env.example               # Environment variables template
+├── .env                       # Development environment (not in git)
+├── .env.production           # Production environment (not in git)
+└── .gitignore                # Git ignore rules (includes .env files)
 ```
 
 ## Navigation Architecture
@@ -158,18 +228,15 @@ useEffect(() => {
 const rates = {
   lastUpdated: new Date(),
   gold: {
-    '24KT': 92838,
-    '22KT': 85155,
-    '20KT': 77830,
-    '18KT': 70375,
-    '14KT': 53800,
+    '22': 85155,
+    '18': 70375,
   },
   silver: {
-    '24KT': 954,
-    '22KT': 905,
-    '18KT': 746,
-    '14KT': 586,
-    '9KT': 388,
+    base: 954,
+  },
+  diamond: {
+    '18': 70375,
+    '14': 53800,
   },
 };
 ```
@@ -179,17 +246,33 @@ const rates = {
 **Purpose**: Interactive jewellery cost calculator with live rate integration
 
 **Key Features**:
-- **Metal Type Toggle**: Switch between gold and silver
-- **Purity Selection**: Dynamic purity options based on metal type
+- **Metal Type Toggle**: Switch between gold, silver, and diamond
+- **Purity Selection**: Dynamic purity options based on metal type (removed for silver)
+- **Diamond Calculations**: Special calculation logic for diamond jewellery
 - **Live Rate Integration**: Automatically updates calculations with current rates
 - **Input Validation**: Handles weight, making charges, and GST inputs
 - **Real-time Calculation**: Updates results as inputs change
 
+**Updated Metal Types**:
+- **Gold**: 22KT and 18KT only (24KT removed)
+- **Silver**: No purity selection (simplified calculation)
+- **Diamond**: 18KT and 14KT with additional diamond-specific fields
+
+**Diamond Calculation Features**:
+- **Diamond Weight**: With dropdown price selection
+- **Solitaire Weight**: With dropdown price selection  
+- **Color Stone Weight**: Fixed rate calculation
+- **Special Formula**: Uses 22KT gold rate for making charges
+
 **Calculation Logic**:
 ```javascript
-const baseValue = (baseRate * weightValue) / 10; // Rate is per 10g
-const makingValue = (baseValue * makingChargesValue) / 100;
-const totalBeforeGST = baseValue + makingValue;
+// Diamond calculation
+const baseValue = (baseRate * weightValue) / 10;
+const makingValue = (makingChargesValue / 100) * gold22Rate;
+const diamondValue = diamondWeightValue * diamondWeightPrice;
+const solitaireValue = solitaireWeightValue * solitaireWeightPrice;
+const colorStoneValue = colorStoneWeightValue * 700;
+const totalBeforeGST = baseValue + makingValue + diamondValue + solitaireValue + colorStoneValue;
 const gstAmount = (totalBeforeGST * gstValue) / 100;
 const totalCost = totalBeforeGST + gstAmount;
 ```
@@ -200,7 +283,7 @@ useEffect(() => {
   if (weight && parseFloat(weight) > 0 && result !== null) {
     handleCalculate();
   }
-}, [weight, purity, makingCharges, gst, metalType, rates]);
+}, [weight, purity, makingCharges, gst, metalType, rates, diamondWeight, diamondWeightPrice, solitaireWeight, solitaireWeightPrice, colorStoneWeight]);
 ```
 
 ### Merchant Info Screen (`app/(tabs)/merchant-info.jsx`)
@@ -251,7 +334,7 @@ const handleCall = async () => {
 - **Update Animation**: Color flash when rates change
 - **Platform Compatibility**: Web-safe animations with fallbacks
 - **Responsive Design**: Adapts to different screen sizes
-- **Type Differentiation**: Different styling for gold vs silver
+- **Type Differentiation**: Different styling for gold vs silver vs diamond
 
 **Animation Logic**:
 ```javascript
@@ -297,7 +380,7 @@ useEffect(() => {
 **Key Features**:
 - **Toggle System**: Switch between Gold, Silver, and Diamond categories
 - **Dynamic Categories**: Each toggle shows different product categories
-- **New Arrivals**: Special section always visible regardless of toggle
+- **Product Modal**: Detailed product view with specifications
 - **Navigation Integration**: Routes to individual category screens
 - **Responsive Layout**: Adapts to different screen sizes
 
@@ -307,21 +390,18 @@ const jewelleryData = {
   gold: {
     title: 'GOLD JEWELLERY',
     color: '#D4AF37',
-    categories: [
+    products: [
       {
-        id: 'gold-jewellery',
-        title: 'GOLD JEWELLERY',
-        route: '/categories/gold-jewellery',
-        subcategories: [
-          {
-            id: 'necklace-sets',
-            name: 'NECKLACE SETS',
-            image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
-          },
-          // ... more subcategories
-        ],
+        id: 1,
+        name: 'Classic Gold Ring',
+        category: 'Rings',
+        price: '₹45,000',
+        weight: '8g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/...',
+        description: 'Product description...',
       },
-      // ... more categories
+      // ... more products
     ],
   },
   silver: { /* Similar structure */ },
@@ -366,7 +446,18 @@ const handleCategoryPress = (category) => {
 **Component Sections**:
 1. **Toggle Section**: Three buttons for Gold, Silver, Diamond
 2. **Active Categories**: Shows categories based on selected toggle
-3. **New Arrival Section**: Always visible, independent of toggle
+3. **Product Modal**: Detailed product information overlay
+
+### JewelleryCarousel Component (`components/JewelleryCarousel.jsx`)
+
+**Purpose**: Displays featured collections in an interactive carousel
+
+**Key Features**:
+- **Auto-scroll**: Automatic slide progression every 4 seconds
+- **Manual Navigation**: Previous/next buttons for manual control
+- **Smooth Animations**: Fade and scale transitions between slides
+- **Responsive Design**: Adapts card size and spacing to screen dimensions
+- **Premium Styling**: Gradient overlays and badge system
 
 ### Category Screens (`app/categories/*.jsx`)
 
@@ -399,13 +490,54 @@ const products = [
 
 ### Rate Service (`services/rateService.js`)
 
-**Purpose**: Manages real-time metal rate updates and subscriptions
+**Purpose**: Manages real-time metal rate updates with secure API integration
 
 **Key Features**:
-- **WebSocket Simulation**: Simulates real-time rate updates
-- **Subscription Management**: Handles multiple subscribers
-- **Rate Fluctuation**: Realistic price movement simulation
-- **Connection Management**: Automatic connect/disconnect based on subscribers
+- **Environment-based Configuration**: All sensitive data in environment variables
+- **Secure API Integration**: Bearer token authentication
+- **WebSocket Support**: Real-time updates when available
+- **Fallback System**: Graceful degradation to simulation mode
+- **Error Handling**: Robust error handling with fallback rates
+
+**Environment Configuration**:
+```javascript
+const API_CONFIG = {
+  url: process.env.EXPO_PUBLIC_API_URL || 'https://api.goldrates.com',
+  key: process.env.EXPO_PUBLIC_API_KEY || '',
+  updateInterval: parseInt(process.env.EXPO_PUBLIC_RATE_UPDATE_INTERVAL || '2000'),
+  enableLiveRates: process.env.EXPO_PUBLIC_ENABLE_LIVE_RATES === 'true',
+};
+```
+
+**Secure API Call**:
+```javascript
+const fetchRatesFromAPI = async () => {
+  try {
+    if (!API_CONFIG.key) {
+      console.warn('API key not configured, using default rates');
+      return currentRates;
+    }
+
+    const response = await fetch(`${API_CONFIG.url}/rates`, {
+      method: 'GET',
+      headers: {
+        'Authorization': `Bearer ${API_CONFIG.key}`,
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return transformApiResponse(data);
+  } catch (error) {
+    console.error('Failed to fetch rates from API:', error);
+    return fallbackRates;
+  }
+};
+```
 
 **Subscription System**:
 ```javascript
@@ -431,10 +563,16 @@ const fluctuation = () => (Math.random() > 0.5 ? 1 : -1) * Math.random() * 0.005
 currentRates = {
   lastUpdated: new Date(),
   gold: {
-    '24KT': Math.round(currentRates.gold['24KT'] * (1 + fluctuation())),
-    // ... other purities
+    '22': Math.round(currentRates.gold['22'] * (1 + fluctuation())),
+    '18': Math.round(currentRates.gold['18'] * (1 + fluctuation())),
   },
-  // ... silver rates
+  silver: {
+    base: Math.round(currentRates.silver.base * (1 + fluctuation())),
+  },
+  diamond: {
+    '18': Math.round(currentRates.diamond['18'] * (1 + fluctuation())),
+    '14': Math.round(currentRates.diamond['14'] * (1 + fluctuation())),
+  },
 };
 
 // Notify all subscribers
@@ -474,6 +612,7 @@ const getResponsiveFontSize = (baseSize) => getResponsiveSize(baseSize - 2, base
 - Primary: `#1A237E` (Deep Blue)
 - Secondary: `#D4AF37` (Gold)
 - Silver: `#8B7355` (Bronze)
+- Diamond: `#E8E3D3` (Light Beige)
 - Background: `#FAFAFA` (Light Gray)
 - Text: `#6B7280` (Medium Gray)
 
@@ -486,6 +625,7 @@ const getResponsiveFontSize = (baseSize) => getResponsiveSize(baseSize - 2, base
 - Primary: `['#1A237E', '#283593', '#3949AB']`
 - Gold: `['#D4AF37', '#B8860B']`
 - Silver: `['#f9f6ef', '#e8e3d3']`
+- Diamond: `['#E8E3D3', '#D4D0C4']`
 
 ### StyleSheet Pattern
 
@@ -607,17 +747,40 @@ const styles = StyleSheet.create({
    npm install
    ```
 
-3. **Start the development server**:
+3. **Set up environment variables**:
+   ```bash
+   cp .env.example .env
+   # Edit .env with your actual API keys and configuration
+   ```
+
+4. **Start the development server**:
    ```bash
    npm run dev
    ```
 
-4. **Platform-specific commands**:
+5. **Platform-specific commands**:
    ```bash
    npm run web     # Web development
    npm run android # Android development
    npm run ios     # iOS development
    ```
+
+### Environment Configuration
+
+1. **Copy the example environment file**:
+   ```bash
+   cp .env.example .env
+   ```
+
+2. **Edit `.env` with your configuration**:
+   - Add your API key for live rate updates
+   - Configure API endpoints
+   - Set update intervals and default rates
+
+3. **For production deployment**:
+   - Set environment variables in your deployment platform
+   - Use production API keys and endpoints
+   - Never commit real API keys to version control
 
 ### Build Commands
 
@@ -661,6 +824,28 @@ npm run build:ios     # iOS build (requires EAS)
 
 **IMPORTANT**: All dependencies must be maintained. Do not remove any existing dependencies as they may be required for proper functionality.
 
+## Security Best Practices
+
+### Environment Variables
+
+- **Never commit** `.env` files with real API keys
+- Use different API keys for development and production
+- Set production environment variables in your deployment platform
+- The app gracefully handles missing API keys with fallback functionality
+
+### API Security
+
+- All API calls use Bearer token authentication
+- API keys are stored in environment variables only
+- No sensitive data is hardcoded in the application
+- Error handling prevents API key exposure in logs
+
+### Git Security
+
+- `.gitignore` is configured to exclude all environment files
+- Only `.env.example` (template) is committed to version control
+- Sensitive configuration is handled through environment variables
+
 ## Contributing
 
 When adding new features:
@@ -671,6 +856,8 @@ When adding new features:
 4. Maintain the existing styling patterns
 5. Test on multiple screen sizes
 6. Ensure web compatibility
+7. Use environment variables for any configuration
+8. Never commit sensitive data like API keys
 
 ## License
 
