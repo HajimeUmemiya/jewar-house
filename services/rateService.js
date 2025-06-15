@@ -11,15 +11,18 @@ const API_CONFIG = {
 // Default rates from environment variables
 const DEFAULT_RATES = {
   gold: {
-    '22': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_22KT || '85155'),
-    '18': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_18KT || '70375'),
+    '24KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_24KT || '92838'),
+    '22KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_22KT || '85155'),
+    '20KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_20KT || '77830'),
+    '18KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_18KT || '70375'),
+    '14KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_14KT || '53800'),
   },
   silver: {
-    base: parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_BASE || '954'),
-  },
-  diamond: {
-    '18': parseInt(process.env.EXPO_PUBLIC_DEFAULT_DIAMOND_18KT || '70375'),
-    '14': parseInt(process.env.EXPO_PUBLIC_DEFAULT_DIAMOND_14KT || '53800'),
+    '24KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_24KT || '954'),
+    '22KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_22KT || '905'),
+    '18KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_18KT || '746'),
+    '14KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_14KT || '586'),
+    '9KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_SILVER_9KT || '388'),
   },
 };
 
@@ -63,15 +66,18 @@ const fetchRatesFromAPI = async () => {
     return {
       lastUpdated: new Date(),
       gold: {
-        '22': data.gold?.['22KT'] || DEFAULT_RATES.gold['22'],
-        '18': data.gold?.['18KT'] || DEFAULT_RATES.gold['18'],
+        '24KT': data.gold?.['24KT'] || DEFAULT_RATES.gold['24KT'],
+        '22KT': data.gold?.['22KT'] || DEFAULT_RATES.gold['22KT'],
+        '20KT': data.gold?.['20KT'] || DEFAULT_RATES.gold['20KT'],
+        '18KT': data.gold?.['18KT'] || DEFAULT_RATES.gold['18KT'],
+        '14KT': data.gold?.['14KT'] || DEFAULT_RATES.gold['14KT'],
       },
       silver: {
-        base: data.silver?.['24KT'] || DEFAULT_RATES.silver.base,
-      },
-      diamond: {
-        '18': data.gold?.['18KT'] || DEFAULT_RATES.diamond['18'],
-        '14': data.gold?.['14KT'] || DEFAULT_RATES.diamond['14'],
+        '24KT': data.silver?.['24KT'] || DEFAULT_RATES.silver['24KT'],
+        '22KT': data.silver?.['22KT'] || DEFAULT_RATES.silver['22KT'],
+        '18KT': data.silver?.['18KT'] || DEFAULT_RATES.silver['18KT'],
+        '14KT': data.silver?.['14KT'] || DEFAULT_RATES.silver['14KT'],
+        '9KT': data.silver?.['9KT'] || DEFAULT_RATES.silver['9KT'],
       },
     };
   } catch (error) {
@@ -98,15 +104,18 @@ const connectWebSocket = () => {
             currentRates = {
               lastUpdated: new Date(),
               gold: {
-                '22': data.gold?.['22KT'] || currentRates.gold['22'],
-                '18': data.gold?.['18KT'] || currentRates.gold['18'],
+                '24KT': data.gold?.['24KT'] || currentRates.gold['24KT'],
+                '22KT': data.gold?.['22KT'] || currentRates.gold['22KT'],
+                '20KT': data.gold?.['20KT'] || currentRates.gold['20KT'],
+                '18KT': data.gold?.['18KT'] || currentRates.gold['18KT'],
+                '14KT': data.gold?.['14KT'] || currentRates.gold['14KT'],
               },
               silver: {
-                base: data.silver?.['24KT'] || currentRates.silver.base,
-              },
-              diamond: {
-                '18': data.gold?.['18KT'] || currentRates.diamond['18'],
-                '14': data.gold?.['14KT'] || currentRates.diamond['14'],
+                '24KT': data.silver?.['24KT'] || currentRates.silver['24KT'],
+                '22KT': data.silver?.['22KT'] || currentRates.silver['22KT'],
+                '18KT': data.silver?.['18KT'] || currentRates.silver['18KT'],
+                '14KT': data.silver?.['14KT'] || currentRates.silver['14KT'],
+                '9KT': data.silver?.['9KT'] || currentRates.silver['9KT'],
               },
             };
             
@@ -157,15 +166,18 @@ const startSimulation = () => {
       currentRates = {
         lastUpdated: new Date(),
         gold: {
-          '22': Math.round(currentRates.gold['22'] * (1 + fluctuation())),
-          '18': Math.round(currentRates.gold['18'] * (1 + fluctuation())),
+          '24KT': Math.round(currentRates.gold['24KT'] * (1 + fluctuation())),
+          '22KT': Math.round(currentRates.gold['22KT'] * (1 + fluctuation())),
+          '20KT': Math.round(currentRates.gold['20KT'] * (1 + fluctuation())),
+          '18KT': Math.round(currentRates.gold['18KT'] * (1 + fluctuation())),
+          '14KT': Math.round(currentRates.gold['14KT'] * (1 + fluctuation())),
         },
         silver: {
-          base: Math.round(currentRates.silver.base * (1 + fluctuation())),
-        },
-        diamond: {
-          '18': Math.round(currentRates.diamond['18'] * (1 + fluctuation())),
-          '14': Math.round(currentRates.diamond['14'] * (1 + fluctuation())),
+          '24KT': Math.round(currentRates.silver['24KT'] * (1 + fluctuation())),
+          '22KT': Math.round(currentRates.silver['22KT'] * (1 + fluctuation())),
+          '18KT': Math.round(currentRates.silver['18KT'] * (1 + fluctuation())),
+          '14KT': Math.round(currentRates.silver['14KT'] * (1 + fluctuation())),
+          '9KT': Math.round(currentRates.silver['9KT'] * (1 + fluctuation())),
         },
       };
     }

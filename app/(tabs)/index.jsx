@@ -50,15 +50,18 @@ export default function HomeScreen() {
   const [rates, setRates] = useState({
     lastUpdated: new Date(),
     gold: {
-      '22': 85155,
-      '18': 70375,
+      '24KT': 92838,
+      '22KT': 85155,
+      '20KT': 77830,
+      '18KT': 70375,
+      '14KT': 53800,
     },
     silver: {
-      base: 954,
-    },
-    diamond: {
-      '18': 70375,
-      '14': 53800,
+      '24KT': 954,
+      '22KT': 905,
+      '18KT': 746,
+      '14KT': 586,
+      '9KT': 388,
     },
   });
   const refreshingAnim = useRef(new Animated.Value(0)).current;
@@ -173,22 +176,36 @@ export default function HomeScreen() {
               <View style={styles.discountColumn}>
                 <MetalRateCard
                   type="gold"
+                  purity="24KT"
+                  rate={rates.gold?.['24KT'] || 0}
+                  isLoading={isLoading}
+                  showLabel={true}
+                />
+                <MetalRateCard
+                  type="gold"
                   purity="22KT"
-                  rate={rates.gold?.['22'] || 0}
+                  rate={rates.gold?.['22KT'] || 0}
+                  isLoading={isLoading}
+                  showLabel={true}
+                />
+                <MetalRateCard
+                  type="gold"
+                  purity="20KT"
+                  rate={rates.gold?.['20KT'] || 0}
                   isLoading={isLoading}
                   showLabel={true}
                 />
                 <MetalRateCard
                   type="gold"
                   purity="18KT"
-                  rate={rates.gold?.['18'] || 0}
+                  rate={rates.gold?.['18KT'] || 0}
                   isLoading={isLoading}
                   showLabel={true}
                 />
                 <MetalRateCard
-                  type="diamond"
-                  purity="18KT"
-                  rate={rates.diamond?.['18'] || 0}
+                  type="gold"
+                  purity="14KT"
+                  rate={rates.gold?.['14KT'] || 0}
                   isLoading={isLoading}
                   showLabel={true}
                 />
@@ -196,15 +213,36 @@ export default function HomeScreen() {
               <View style={styles.discountColumn}>
                 <MetalRateCard
                   type="silver"
-                  purity=""
-                  rate={rates.silver?.base || 0}
+                  purity="24KT"
+                  rate={rates.silver?.['24KT'] || 0}
                   isLoading={isLoading}
                   showLabel={true}
                 />
                 <MetalRateCard
-                  type="diamond"
+                  type="silver"
+                  purity="22KT"
+                  rate={rates.silver?.['22KT'] || 0}
+                  isLoading={isLoading}
+                  showLabel={true}
+                />
+                <MetalRateCard
+                  type="silver"
+                  purity="18KT"
+                  rate={rates.silver?.['18KT'] || 0}
+                  isLoading={isLoading}
+                  showLabel={true}
+                />
+                <MetalRateCard
+                  type="silver"
                   purity="14KT"
-                  rate={rates.diamond?.['14'] || 0}
+                  rate={rates.silver?.['14KT'] || 0}
+                  isLoading={isLoading}
+                  showLabel={true}
+                />
+                <MetalRateCard
+                  type="silver"
+                  purity="9KT"
+                  rate={rates.silver?.['9KT'] || 0}
                   isLoading={isLoading}
                   showLabel={true}
                 />
