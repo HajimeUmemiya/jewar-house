@@ -78,11 +78,15 @@ export default function MetalRateCard({
     inputRange: [0, 1],
     outputRange: [
       'transparent',
-      type === 'gold' ? 'rgba(212, 175, 55, 0.15)' : 'rgba(249, 246, 239, 0.3)',
+      type === 'gold' ? 'rgba(212, 175, 55, 0.15)' : 
+      type === 'diamond' ? 'rgba(232, 227, 211, 0.15)' :
+      'rgba(249, 246, 239, 0.3)',
     ],
   });
 
-  const formattedRate = rate.toLocaleString('en-IN');
+  // Safe rate formatting with fallback
+  const safeRate = rate || 0;
+  const formattedRate = safeRate.toLocaleString('en-IN');
 
   // Platform-specific style to handle web compatibility
   const animatedStyle = Platform.select({
@@ -103,21 +107,28 @@ export default function MetalRateCard({
     >
       <View style={styles.rateInfoContainer}>
         {showLabel && (
-          <Text style={[styles.label, type === 'gold' ? styles.goldLabel : styles.silverLabel]}>
+          <Text style={[
+            styles.label, 
+            type === 'gold' ? styles.goldLabel : 
+            type === 'diamond' ? styles.diamondLabel :
+            styles.silverLabel
+          ]}>
             {type.toUpperCase()} {purity}
           </Text>
         )}
 
         <View style={styles.rateContainer}>
           <LinearGradient
-            colors={type === 'gold' ? ['#D4AF37', '#B8860B'] : ['#f9f6ef', '#e8e3d3']}
+            colors={type === 'gold' ? ['#D4AF37', '#B8860B'] : 
+                   type === 'diamond' ? ['#E8E3D3', '#D4D0C4'] :
+                   ['#f9f6ef', '#e8e3d3']}
             style={styles.purityCircle}
           >
             <Text style={[
               styles.purityText,
-              type === 'silver' && styles.silverPurityText
+              (type === 'silver' || type === 'diamond') && styles.silverPurityText
             ]}>
-              {purity.replace('KT', '')}
+              {purity ? purity.replace('KT', '') : type === 'silver' ? 'AG' : 'D'}
             </Text>
           </LinearGradient>
 
@@ -173,6 +184,9 @@ const styles = StyleSheet.create({
     color: '#B8860B',
   },
   silverLabel: {
+    color: '#8B7355',
+  },
+  diamondLabel: {
     color: '#8B7355',
   },
   rateInfoContainer: {
