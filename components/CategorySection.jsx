@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ScrollView, Modal, Pressable } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ChevronRight, X, MapPin, MessageCircle, Package } from 'lucide-react-native';
+import { X, MapPin, MessageCircle, Star } from 'lucide-react-native';
 import { Linking } from 'react-native';
 
 const { width: screenWidth } = Dimensions.get('window');
@@ -22,360 +22,297 @@ const getResponsiveSize = (small, medium, large, tablet = large) => {
 const getResponsivePadding = () => getResponsiveSize(12, 14, 16, 20);
 const getResponsiveFontSize = (baseSize) => getResponsiveSize(baseSize - 2, baseSize - 1, baseSize, baseSize + 2);
 
-// Updated jewellery data with new categories and products
+// Updated jewellery data with direct products
 const jewelleryData = {
   gold: {
     title: 'GOLD JEWELLERY',
     color: '#D4AF37',
-    categories: [
+    products: [
+      // Rings
       {
-        id: 'rings',
-        name: 'Rings',
-        icon: '💍',
-        productCount: 8,
-        products: [
-          {
-            id: 1,
-            name: 'Classic Gold Ring',
-            price: '₹45,000',
-            weight: '8g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
-            description: 'Elegant classic gold ring with traditional design and superior craftsmanship.',
-          },
-          {
-            id: 2,
-            name: 'Designer Gold Ring',
-            price: '₹65,000',
-            weight: '12g',
-            purity: '18KT',
-            image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
-            description: 'Contemporary designer ring with intricate patterns and modern appeal.',
-          },
-        ],
+        id: 1,
+        name: 'Classic Gold Ring',
+        category: 'Rings',
+        price: '₹45,000',
+        weight: '8g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
+        description: 'Elegant classic gold ring with traditional design and superior craftsmanship.',
       },
       {
-        id: 'tops',
-        name: 'Tops',
-        icon: '👂',
-        productCount: 12,
-        products: [
-          {
-            id: 3,
-            name: 'Gold Stud Tops',
-            price: '₹25,000',
-            weight: '6g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
-            description: 'Beautiful gold stud earrings perfect for daily wear.',
-          },
-          {
-            id: 4,
-            name: 'Chandelier Tops',
-            price: '₹85,000',
-            weight: '18g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
-            description: 'Stunning chandelier earrings with intricate gold work.',
-          },
-        ],
+        id: 2,
+        name: 'Designer Gold Ring',
+        category: 'Rings',
+        price: '₹65,000',
+        weight: '12g',
+        purity: '18KT',
+        image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
+        description: 'Contemporary designer ring with intricate patterns and modern appeal.',
+      },
+      // Tops/Earrings
+      {
+        id: 3,
+        name: 'Gold Stud Tops',
+        category: 'Tops',
+        price: '₹25,000',
+        weight: '6g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+        description: 'Beautiful gold stud earrings perfect for daily wear.',
       },
       {
-        id: 'bangles',
-        name: 'Bangles',
-        icon: '⚪',
-        productCount: 15,
-        products: [
-          {
-            id: 5,
-            name: 'Traditional Gold Bangles',
-            price: '₹1,25,000',
-            weight: '45g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
-            description: 'Set of traditional gold bangles with antique finish.',
-          },
-          {
-            id: 6,
-            name: 'Designer Gold Bracelet',
-            price: '₹75,000',
-            weight: '25g',
-            purity: '18KT',
-            image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
-            description: 'Modern designer bracelet with contemporary patterns.',
-          },
-        ],
+        id: 4,
+        name: 'Chandelier Tops',
+        category: 'Tops',
+        price: '₹85,000',
+        weight: '18g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
+        description: 'Stunning chandelier earrings with intricate gold work.',
+      },
+      // Bangles
+      {
+        id: 5,
+        name: 'Traditional Gold Bangles',
+        category: 'Bangles',
+        price: '₹1,25,000',
+        weight: '45g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
+        description: 'Set of traditional gold bangles with antique finish.',
       },
       {
-        id: 'necklaces',
-        name: 'Necklaces',
-        icon: '📿',
-        productCount: 20,
-        products: [
-          {
-            id: 7,
-            name: 'Gold Chain Necklace',
-            price: '₹1,85,000',
-            weight: '35g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
-            description: 'Elegant gold chain necklace with premium quality.',
-          },
-          {
-            id: 8,
-            name: 'Antique Necklace Set',
-            price: '₹2,45,000',
-            weight: '55g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
-            description: 'Traditional antique necklace set with matching earrings.',
-          },
-        ],
+        id: 6,
+        name: 'Designer Gold Bracelet',
+        category: 'Bangles',
+        price: '₹75,000',
+        weight: '25g',
+        purity: '18KT',
+        image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
+        description: 'Modern designer bracelet with contemporary patterns.',
+      },
+      // Necklaces
+      {
+        id: 7,
+        name: 'Gold Chain Necklace',
+        category: 'Necklaces',
+        price: '₹1,85,000',
+        weight: '35g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
+        description: 'Elegant gold chain necklace with premium quality.',
       },
       {
-        id: 'miscellaneous',
-        name: 'Miscellaneous',
-        icon: '✨',
-        productCount: 10,
-        products: [
-          {
-            id: 9,
-            name: 'Gold Pendant',
-            price: '₹35,000',
-            weight: '8g',
-            purity: '18KT',
-            image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
-            description: 'Beautiful gold pendant with modern design.',
-          },
-          {
-            id: 10,
-            name: 'Gold Anklet',
-            price: '₹55,000',
-            weight: '15g',
-            purity: '22KT',
-            image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
-            description: 'Traditional gold anklet with delicate patterns.',
-          },
-        ],
+        id: 8,
+        name: 'Antique Necklace Set',
+        category: 'Necklaces',
+        price: '₹2,45,000',
+        weight: '55g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
+        description: 'Traditional antique necklace set with matching earrings.',
+      },
+      // Miscellaneous
+      {
+        id: 9,
+        name: 'Gold Pendant',
+        category: 'Miscellaneous',
+        price: '₹35,000',
+        weight: '8g',
+        purity: '18KT',
+        image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+        description: 'Beautiful gold pendant with modern design.',
+      },
+      {
+        id: 10,
+        name: 'Gold Anklet',
+        category: 'Miscellaneous',
+        price: '₹55,000',
+        weight: '15g',
+        purity: '22KT',
+        image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
+        description: 'Traditional gold anklet with delicate patterns.',
       },
     ],
   },
   diamond: {
     title: 'DIAMOND JEWELLERY',
     color: '#E8E3D3',
-    categories: [
+    products: [
+      // Rings
       {
-        id: 'rings',
-        name: 'Rings',
-        icon: '💎',
-        productCount: 6,
-        products: [
-          {
-            id: 11,
-            name: 'Diamond Engagement Ring',
-            price: '₹3,25,000',
-            weight: '6g',
-            purity: '18KT + VVS1',
-            image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
-            description: 'Stunning engagement ring with VVS1 diamond.',
-          },
-          {
-            id: 12,
-            name: 'Diamond Eternity Band',
-            price: '₹2,85,000',
-            weight: '8g',
-            purity: '18KT + VS2',
-            image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
-            description: 'Beautiful eternity band with perfectly matched diamonds.',
-          },
-        ],
+        id: 11,
+        name: 'Diamond Engagement Ring',
+        category: 'Rings',
+        price: '₹3,25,000',
+        weight: '6g',
+        purity: '18KT + VVS1',
+        image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
+        description: 'Stunning engagement ring with VVS1 diamond.',
       },
       {
-        id: 'earrings',
-        name: 'Earrings',
-        icon: '💫',
-        productCount: 8,
-        products: [
-          {
-            id: 13,
-            name: 'Diamond Stud Earrings',
-            price: '₹1,85,000',
-            weight: '4g',
-            purity: '18KT + VVS2',
-            image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
-            description: 'Classic diamond stud earrings with brilliant cut diamonds.',
-          },
-          {
-            id: 14,
-            name: 'Diamond Drop Earrings',
-            price: '₹4,25,000',
-            weight: '12g',
-            purity: '18KT + VS1',
-            image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
-            description: 'Elegant drop earrings with cascading diamonds.',
-          },
-        ],
+        id: 12,
+        name: 'Diamond Eternity Band',
+        category: 'Rings',
+        price: '₹2,85,000',
+        weight: '8g',
+        purity: '18KT + VS2',
+        image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
+        description: 'Beautiful eternity band with perfectly matched diamonds.',
+      },
+      // Earrings
+      {
+        id: 13,
+        name: 'Diamond Stud Earrings',
+        category: 'Earrings',
+        price: '₹1,85,000',
+        weight: '4g',
+        purity: '18KT + VVS2',
+        image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+        description: 'Classic diamond stud earrings with brilliant cut diamonds.',
       },
       {
-        id: 'bracelet',
-        name: 'Bracelet',
-        icon: '🔗',
-        productCount: 4,
-        products: [
-          {
-            id: 15,
-            name: 'Diamond Tennis Bracelet',
-            price: '₹6,85,000',
-            weight: '18g',
-            purity: '18KT + VS2',
-            image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
-            description: 'Luxurious tennis bracelet with perfectly matched diamonds.',
-          },
-        ],
+        id: 14,
+        name: 'Diamond Drop Earrings',
+        category: 'Earrings',
+        price: '₹4,25,000',
+        weight: '12g',
+        purity: '18KT + VS1',
+        image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
+        description: 'Elegant drop earrings with cascading diamonds.',
+      },
+      // Bracelet
+      {
+        id: 15,
+        name: 'Diamond Tennis Bracelet',
+        category: 'Bracelet',
+        price: '₹6,85,000',
+        weight: '18g',
+        purity: '18KT + VS2',
+        image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
+        description: 'Luxurious tennis bracelet with perfectly matched diamonds.',
+      },
+      // Bangles
+      {
+        id: 16,
+        name: 'Diamond Gold Bangles',
+        category: 'Bangles',
+        price: '₹8,95,000',
+        weight: '35g',
+        purity: '18KT + VVS1',
+        image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
+        description: 'Exquisite diamond bangles with premium gold setting.',
+      },
+      // Necklace Set
+      {
+        id: 17,
+        name: 'Diamond Necklace Set',
+        category: 'Necklace Set',
+        price: '₹12,50,000',
+        weight: '45g',
+        purity: '18KT + VVS2',
+        image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
+        description: 'Complete diamond necklace set with matching earrings.',
       },
       {
-        id: 'bangles',
-        name: 'Bangles',
-        icon: '⭕',
-        productCount: 5,
-        products: [
-          {
-            id: 16,
-            name: 'Diamond Gold Bangles',
-            price: '₹8,95,000',
-            weight: '35g',
-            purity: '18KT + VVS1',
-            image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
-            description: 'Exquisite diamond bangles with premium gold setting.',
-          },
-        ],
-      },
-      {
-        id: 'necklace-set',
-        name: 'Necklace Set',
-        icon: '👑',
-        productCount: 7,
-        products: [
-          {
-            id: 17,
-            name: 'Diamond Necklace Set',
-            price: '₹12,50,000',
-            weight: '45g',
-            purity: '18KT + VVS2',
-            image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
-            description: 'Complete diamond necklace set with matching earrings.',
-          },
-        ],
+        id: 18,
+        name: 'Vintage Diamond Set',
+        category: 'Necklace Set',
+        price: '₹15,75,000',
+        weight: '52g',
+        purity: '18KT + VVS1',
+        image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
+        description: 'Vintage-inspired diamond necklace set with intricate details.',
       },
     ],
   },
   silver: {
     title: 'SILVER JEWELLERY',
     color: '#8B7355',
-    categories: [
+    products: [
+      // Bichua
       {
-        id: 'bichua',
-        name: 'Bichua',
-        icon: '🦶',
-        productCount: 6,
-        products: [
-          {
-            id: 18,
-            name: 'Traditional Silver Bichua',
-            price: '₹3,500',
-            weight: '12g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
-            description: 'Traditional silver toe rings with intricate patterns.',
-          },
-          {
-            id: 19,
-            name: 'Designer Silver Bichua',
-            price: '₹4,200',
-            weight: '15g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
-            description: 'Modern designer toe rings with contemporary appeal.',
-          },
-        ],
+        id: 19,
+        name: 'Traditional Silver Bichua',
+        category: 'Bichua',
+        price: '₹3,500',
+        weight: '12g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/1457801/pexels-photo-1457801.jpeg',
+        description: 'Traditional silver toe rings with intricate patterns.',
       },
       {
-        id: 'paajeb',
-        name: 'Paajeb',
-        icon: '🦵',
-        productCount: 8,
-        products: [
-          {
-            id: 20,
-            name: 'Silver Anklet Chain',
-            price: '₹6,500',
-            weight: '25g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
-            description: 'Beautiful silver anklet with traditional bells.',
-          },
-          {
-            id: 21,
-            name: 'Heavy Silver Paajeb',
-            price: '₹12,000',
-            weight: '45g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
-            description: 'Heavy traditional silver anklet with intricate work.',
-          },
-        ],
+        id: 20,
+        name: 'Designer Silver Bichua',
+        category: 'Bichua',
+        price: '₹4,200',
+        weight: '15g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/10894828/pexels-photo-10894828.jpeg',
+        description: 'Modern designer toe rings with contemporary appeal.',
+      },
+      // Paajeb
+      {
+        id: 21,
+        name: 'Silver Anklet Chain',
+        category: 'Paajeb',
+        price: '₹6,500',
+        weight: '25g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/1413420/pexels-photo-1413420.jpeg',
+        description: 'Beautiful silver anklet with traditional bells.',
       },
       {
-        id: 'god-idols',
-        name: 'God Idols',
-        icon: '🕉️',
-        productCount: 12,
-        products: [
-          {
-            id: 22,
-            name: 'Silver Ganesha Idol',
-            price: '₹8,500',
-            weight: '35g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
-            description: 'Beautiful silver Ganesha idol for worship and decoration.',
-          },
-          {
-            id: 23,
-            name: 'Silver Lakshmi Idol',
-            price: '₹15,000',
-            weight: '65g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
-            description: 'Elegant silver Lakshmi idol with detailed craftsmanship.',
-          },
-        ],
+        id: 22,
+        name: 'Heavy Silver Paajeb',
+        category: 'Paajeb',
+        price: '₹12,000',
+        weight: '45g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/266621/pexels-photo-266621.jpeg',
+        description: 'Heavy traditional silver anklet with intricate work.',
+      },
+      // God Idols
+      {
+        id: 23,
+        name: 'Silver Ganesha Idol',
+        category: 'God Idols',
+        price: '₹8,500',
+        weight: '35g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/248077/pexels-photo-248077.jpeg',
+        description: 'Beautiful silver Ganesha idol for worship and decoration.',
       },
       {
-        id: 'bartan',
-        name: 'Bartan',
-        icon: '🍽️',
-        productCount: 10,
-        products: [
-          {
-            id: 24,
-            name: 'Silver Plate Set',
-            price: '₹25,000',
-            weight: '150g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
-            description: 'Premium silver plate set for special occasions.',
-          },
-          {
-            id: 25,
-            name: 'Silver Glass Set',
-            price: '₹18,000',
-            weight: '120g',
-            purity: '92.5%',
-            image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
-            description: 'Elegant silver glass set with traditional design.',
-          },
-        ],
+        id: 24,
+        name: 'Silver Lakshmi Idol',
+        category: 'God Idols',
+        price: '₹15,000',
+        weight: '65g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/989967/pexels-photo-989967.jpeg',
+        description: 'Elegant silver Lakshmi idol with detailed craftsmanship.',
+      },
+      // Bartan
+      {
+        id: 25,
+        name: 'Silver Plate Set',
+        category: 'Bartan',
+        price: '₹25,000',
+        weight: '150g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/1454171/pexels-photo-1454171.jpeg',
+        description: 'Premium silver plate set for special occasions.',
+      },
+      {
+        id: 26,
+        name: 'Silver Glass Set',
+        category: 'Bartan',
+        price: '₹18,000',
+        weight: '120g',
+        purity: '92.5%',
+        image: 'https://images.pexels.com/photos/2735970/pexels-photo-2735970.jpeg',
+        description: 'Elegant silver glass set with traditional design.',
       },
     ],
   },
@@ -383,9 +320,7 @@ const jewelleryData = {
 
 export default function CategorySection() {
   const [activeToggle, setActiveToggle] = useState('gold');
-  const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
   const [productModalVisible, setProductModalVisible] = useState(false);
 
   const handleStoreLocation = async () => {
@@ -407,20 +342,9 @@ export default function CategorySection() {
     }
   };
 
-  const openCategoryModal = (category) => {
-    setSelectedCategory(category);
-    setCategoryModalVisible(true);
-  };
-
-  const closeCategoryModal = () => {
-    setCategoryModalVisible(false);
-    setSelectedCategory(null);
-  };
-
   const openProductModal = (product) => {
     setSelectedProduct(product);
     setProductModalVisible(true);
-    setCategoryModalVisible(false);
   };
 
   const closeProductModal = () => {
@@ -455,105 +379,77 @@ export default function CategorySection() {
     </TouchableOpacity>
   );
 
-  const renderCategoryCard = (category) => (
+  const renderProductCard = (product) => (
     <TouchableOpacity
-      key={category.id}
-      style={styles.categoryCard}
-      onPress={() => openCategoryModal(category)}
-      activeOpacity={0.8}
+      key={product.id}
+      style={styles.productCard}
+      onPress={() => openProductModal(product)}
+      activeOpacity={0.9}
     >
       <LinearGradient
         colors={['#FFFFFF', '#FAFAFA']}
-        style={styles.categoryGradient}
+        style={styles.productGradient}
       >
-        <View style={styles.categoryIconContainer}>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: product.image }} style={styles.productImage} />
           <LinearGradient
-            colors={['#1A237E', '#283593']}
-            style={styles.categoryIconBackground}
-          >
-            <Text style={styles.categoryIcon}>{category.icon}</Text>
-          </LinearGradient>
+            colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
+            style={styles.imageOverlay}
+          />
+          
+          {/* Category Badge */}
+          <View style={styles.categoryBadge}>
+            <LinearGradient
+              colors={activeToggle === 'gold' 
+                ? ['#D4AF37', '#B8860B'] 
+                : activeToggle === 'diamond'
+                ? ['#E8E3D3', '#D4D0C4']
+                : ['#8B7355', '#6B5B47']
+              }
+              style={styles.badgeGradient}
+            >
+              <Text style={[
+                styles.badgeText,
+                activeToggle === 'diamond' && styles.diamondBadgeText
+              ]}>
+                {product.category}
+              </Text>
+            </LinearGradient>
+          </View>
+
+          {/* Premium Badge */}
+          <View style={styles.premiumBadge}>
+            <Star size={getResponsiveSize(10, 11, 12)} color="#FFFFFF" fill="#FFFFFF" />
+          </View>
         </View>
-        
-        <View style={styles.categoryInfo}>
-          <Text style={styles.categoryName}>{category.name}</Text>
-          <Text style={styles.categoryCount}>
-            {category.productCount} Products
+
+        <View style={styles.productInfo}>
+          <Text style={styles.productName} numberOfLines={2}>
+            {product.name}
           </Text>
-        </View>
-        
-        <View style={styles.categoryArrow}>
-          <ChevronRight size={getResponsiveSize(20, 22, 24)} color="#6B7280" />
+          
+          <View style={styles.productMeta}>
+            <Text style={[
+              styles.productPrice,
+              activeToggle === 'gold' && styles.goldPrice,
+              activeToggle === 'diamond' && styles.diamondPrice,
+              activeToggle === 'silver' && styles.silverPrice,
+            ]}>
+              {product.price}
+            </Text>
+            <View style={styles.productSpecs}>
+              <Text style={styles.specText}>{product.weight}</Text>
+              <View style={styles.specDivider} />
+              <Text style={styles.specText}>{product.purity}</Text>
+            </View>
+          </View>
+
+          <Text style={styles.productDescription} numberOfLines={2}>
+            {product.description}
+          </Text>
         </View>
       </LinearGradient>
     </TouchableOpacity>
-  );
-
-  const renderCategoryModal = () => (
-    <Modal
-      animationType="slide"
-      transparent={true}
-      visible={categoryModalVisible}
-      onRequestClose={closeCategoryModal}
-    >
-      <View style={styles.modalOverlay}>
-        <Pressable style={styles.modalBackdrop} onPress={closeCategoryModal} />
-        <View style={styles.modalContainer}>
-          <LinearGradient
-            colors={['#FFFFFF', '#FAFAFA']}
-            style={styles.modalGradient}
-          >
-            {selectedCategory && (
-              <>
-                <View style={styles.modalHeader}>
-                  <View style={styles.modalTitleContainer}>
-                    <Text style={styles.modalCategoryIcon}>{selectedCategory.icon}</Text>
-                    <Text style={styles.modalTitle}>{selectedCategory.name}</Text>
-                  </View>
-                  <TouchableOpacity
-                    style={styles.closeButton}
-                    onPress={closeCategoryModal}
-                  >
-                    <X size={getResponsiveSize(20, 22, 24)} color="#6B7280" />
-                  </TouchableOpacity>
-                </View>
-
-                <ScrollView style={styles.modalContent}>
-                  <View style={styles.productsGrid}>
-                    {selectedCategory.products.map((product) => (
-                      <TouchableOpacity
-                        key={product.id}
-                        style={styles.productCard}
-                        onPress={() => openProductModal(product)}
-                        activeOpacity={0.8}
-                      >
-                        <LinearGradient
-                          colors={['#FFFFFF', '#FAFAFA']}
-                          style={styles.productGradient}
-                        >
-                          <Image source={{ uri: product.image }} style={styles.productImage} />
-                          <View style={styles.productInfo}>
-                            <Text style={styles.productName} numberOfLines={1}>
-                              {product.name}
-                            </Text>
-                            <Text style={styles.productPrice}>{product.price}</Text>
-                            <View style={styles.productMeta}>
-                              <Text style={styles.productWeight}>{product.weight}</Text>
-                              <Text style={styles.productPurity}>{product.purity}</Text>
-                            </View>
-                          </View>
-                          <ChevronRight size={getResponsiveSize(16, 18, 20)} color="#6B7280" />
-                        </LinearGradient>
-                      </TouchableOpacity>
-                    ))}
-                  </View>
-                </ScrollView>
-              </>
-            )}
-          </LinearGradient>
-        </View>
-      </View>
-    </Modal>
   );
 
   const renderProductModal = () => (
@@ -583,11 +479,43 @@ export default function CategorySection() {
                 </View>
 
                 <ScrollView style={styles.modalContent}>
-                  <Image source={{ uri: selectedProduct.image }} style={styles.modalImage} />
+                  <View style={styles.modalImageContainer}>
+                    <Image source={{ uri: selectedProduct.image }} style={styles.modalImage} />
+                    <LinearGradient
+                      colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
+                      style={styles.modalImageOverlay}
+                    />
+                    
+                    <View style={styles.modalCategoryBadge}>
+                      <LinearGradient
+                        colors={activeToggle === 'gold' 
+                          ? ['#D4AF37', '#B8860B'] 
+                          : activeToggle === 'diamond'
+                          ? ['#E8E3D3', '#D4D0C4']
+                          : ['#8B7355', '#6B5B47']
+                        }
+                        style={styles.modalBadgeGradient}
+                      >
+                        <Text style={[
+                          styles.modalBadgeText,
+                          activeToggle === 'diamond' && styles.diamondBadgeText
+                        ]}>
+                          {selectedProduct.category}
+                        </Text>
+                      </LinearGradient>
+                    </View>
+                  </View>
                   
                   <View style={styles.modalProductInfo}>
                     <Text style={styles.modalProductName}>{selectedProduct.name}</Text>
-                    <Text style={styles.modalProductPrice}>{selectedProduct.price}</Text>
+                    <Text style={[
+                      styles.modalProductPrice,
+                      activeToggle === 'gold' && styles.goldPrice,
+                      activeToggle === 'diamond' && styles.diamondPrice,
+                      activeToggle === 'silver' && styles.silverPrice,
+                    ]}>
+                      {selectedProduct.price}
+                    </Text>
                     
                     <View style={styles.modalProductSpecs}>
                       <View style={styles.specRow}>
@@ -597,6 +525,10 @@ export default function CategorySection() {
                       <View style={styles.specRow}>
                         <Text style={styles.specLabel}>Purity:</Text>
                         <Text style={styles.specValue}>{selectedProduct.purity}</Text>
+                      </View>
+                      <View style={styles.specRow}>
+                        <Text style={styles.specLabel}>Category:</Text>
+                        <Text style={styles.specValue}>{selectedProduct.category}</Text>
                       </View>
                     </View>
                     
@@ -641,6 +573,8 @@ export default function CategorySection() {
     </Modal>
   );
 
+  const currentProducts = jewelleryData[activeToggle].products;
+
   return (
     <View style={styles.container}>
       {/* Toggle Section */}
@@ -652,17 +586,12 @@ export default function CategorySection() {
         </View>
       </View>
 
-      {/* Categories Grid */}
-      <View style={styles.categoriesSection}>
-        <View style={styles.categoriesGrid}>
-          {jewelleryData[activeToggle].categories.map((category) => 
-            renderCategoryCard(category)
-          )}
+      {/* Products Grid */}
+      <View style={styles.productsSection}>
+        <View style={styles.productsGrid}>
+          {currentProducts.map((product) => renderProductCard(product))}
         </View>
       </View>
-
-      {/* Category Modal */}
-      {renderCategoryModal()}
 
       {/* Product Modal */}
       {renderProductModal()}
@@ -676,7 +605,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   toggleSection: {
-    marginBottom: getResponsiveSize(20, 24, 28),
+    marginBottom: getResponsiveSize(24, 28, 32),
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -726,66 +655,126 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 2,
   },
-  categoriesSection: {
+  productsSection: {
     flex: 1,
   },
-  categoriesGrid: {
+  productsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
     gap: getResponsiveSize(12, 14, 16),
   },
-  categoryCard: {
-    backgroundColor: '#FFFFFF',
+  productCard: {
+    width: isTablet ? '31%' : isSmallDevice ? '100%' : '48%',
+    borderRadius: getResponsiveSize(16, 18, 20),
+    overflow: 'hidden',
+    elevation: 6,
+    shadowColor: '#1A237E',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.15,
+    shadowRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(232, 234, 246, 0.3)',
+    marginBottom: getResponsiveSize(16, 18, 20),
+  },
+  productGradient: {
+    flex: 1,
+  },
+  imageContainer: {
+    position: 'relative',
+    height: getResponsiveSize(180, 200, 220),
+  },
+  productImage: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  imageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '40%',
+  },
+  categoryBadge: {
+    position: 'absolute',
+    top: getResponsiveSize(10, 12, 14),
+    left: getResponsiveSize(10, 12, 14),
     borderRadius: getResponsiveSize(12, 14, 16),
     overflow: 'hidden',
-    elevation: 4,
-    shadowColor: '#1A237E',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    borderWidth: 1,
-    borderColor: '#E8EAF6',
   },
-  categoryGradient: {
+  badgeGradient: {
+    paddingHorizontal: getResponsiveSize(8, 10, 12),
+    paddingVertical: getResponsiveSize(4, 5, 6),
+  },
+  badgeText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: getResponsiveFontSize(10),
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
+  },
+  diamondBadgeText: {
+    color: '#8B7355',
+    textShadowColor: 'rgba(139, 115, 85, 0.3)',
+  },
+  premiumBadge: {
+    position: 'absolute',
+    top: getResponsiveSize(10, 12, 14),
+    right: getResponsiveSize(10, 12, 14),
+    backgroundColor: 'rgba(212, 175, 55, 0.9)',
+    borderRadius: getResponsiveSize(12, 14, 16),
+    padding: getResponsiveSize(6, 7, 8),
+  },
+  productInfo: {
+    padding: getResponsiveSize(12, 14, 16),
+    gap: getResponsiveSize(8, 9, 10),
+  },
+  productName: {
+    fontFamily: 'CrimsonPro-SemiBold',
+    fontSize: getResponsiveFontSize(16),
+    color: '#1A237E',
+    letterSpacing: 0.3,
+    lineHeight: getResponsiveFontSize(20),
+  },
+  productMeta: {
+    gap: getResponsiveSize(6, 7, 8),
+  },
+  productPrice: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: getResponsiveFontSize(16),
+  },
+  goldPrice: {
+    color: '#D4AF37',
+  },
+  diamondPrice: {
+    color: '#E8E3D3',
+  },
+  silverPrice: {
+    color: '#8B7355',
+  },
+  productSpecs: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: getResponsiveSize(16, 18, 20),
-    gap: getResponsiveSize(16, 18, 20),
+    gap: getResponsiveSize(8, 9, 10),
   },
-  categoryIconContainer: {
-    borderRadius: getResponsiveSize(25, 28, 32),
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#1A237E',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 3,
-  },
-  categoryIconBackground: {
-    width: getResponsiveSize(50, 56, 64),
-    height: getResponsiveSize(50, 56, 64),
-    borderRadius: getResponsiveSize(25, 28, 32),
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  categoryIcon: {
-    fontSize: getResponsiveSize(24, 28, 32),
-  },
-  categoryInfo: {
-    flex: 1,
-    gap: getResponsiveSize(4, 5, 6),
-  },
-  categoryName: {
-    fontFamily: 'CrimsonPro-SemiBold',
-    fontSize: getResponsiveFontSize(18),
-    color: '#1A237E',
-    letterSpacing: 0.5,
-  },
-  categoryCount: {
+  specText: {
     fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(14),
+    fontSize: getResponsiveFontSize(12),
     color: '#6B7280',
   },
-  categoryArrow: {
-    padding: getResponsiveSize(4, 5, 6),
+  specDivider: {
+    width: 1,
+    height: getResponsiveSize(12, 14, 16),
+    backgroundColor: '#E8EAF6',
+  },
+  productDescription: {
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(13),
+    color: '#6B7280',
+    lineHeight: getResponsiveFontSize(18),
   },
   // Modal Styles
   modalOverlay: {
@@ -801,7 +790,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContainer: {
-    maxHeight: '85%',
+    maxHeight: '90%',
     borderTopLeftRadius: getResponsiveSize(20, 22, 24),
     borderTopRightRadius: getResponsiveSize(20, 22, 24),
     overflow: 'hidden',
@@ -823,14 +812,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#E8EAF6',
   },
-  modalTitleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: getResponsiveSize(12, 14, 16),
-  },
-  modalCategoryIcon: {
-    fontSize: getResponsiveSize(24, 26, 28),
-  },
   modalTitle: {
     fontFamily: 'CrimsonPro-SemiBold',
     fontSize: getResponsiveFontSize(20),
@@ -844,89 +825,63 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    paddingHorizontal: getResponsiveSize(20, 22, 24),
   },
-  productsGrid: {
-    paddingVertical: getResponsiveSize(16, 18, 20),
-    gap: getResponsiveSize(12, 14, 16),
-  },
-  productCard: {
-    borderRadius: getResponsiveSize(12, 14, 16),
-    overflow: 'hidden',
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    borderWidth: 0.5,
-    borderColor: '#E8EAF6',
-  },
-  productGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: getResponsiveSize(12, 14, 16),
-    gap: getResponsiveSize(12, 14, 16),
-  },
-  productImage: {
-    width: getResponsiveSize(70, 80, 90),
-    height: getResponsiveSize(70, 80, 90),
-    borderRadius: getResponsiveSize(8, 10, 12),
-  },
-  productInfo: {
-    flex: 1,
-    gap: getResponsiveSize(4, 5, 6),
-  },
-  productName: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(16),
-    color: '#1A237E',
-    letterSpacing: 0.3,
-  },
-  productPrice: {
-    fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(16),
-    color: '#D4AF37',
-  },
-  productMeta: {
-    flexDirection: 'row',
-    gap: getResponsiveSize(8, 10, 12),
-  },
-  productWeight: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
-    color: '#6B7280',
-  },
-  productPurity: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
-    color: '#6B7280',
+  modalImageContainer: {
+    position: 'relative',
+    height: getResponsiveSize(250, 280, 320),
   },
   modalImage: {
     width: '100%',
-    height: getResponsiveSize(200, 220, 240),
-    borderRadius: getResponsiveSize(12, 14, 16),
-    marginVertical: getResponsiveSize(16, 18, 20),
+    height: '100%',
+    resizeMode: 'cover',
+  },
+  modalImageOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: '30%',
+  },
+  modalCategoryBadge: {
+    position: 'absolute',
+    top: getResponsiveSize(16, 18, 20),
+    left: getResponsiveSize(16, 18, 20),
+    borderRadius: getResponsiveSize(16, 18, 20),
+    overflow: 'hidden',
+  },
+  modalBadgeGradient: {
+    paddingHorizontal: getResponsiveSize(12, 14, 16),
+    paddingVertical: getResponsiveSize(6, 7, 8),
+  },
+  modalBadgeText: {
+    fontFamily: 'Poppins-SemiBold',
+    fontSize: getResponsiveFontSize(12),
+    color: '#FFFFFF',
+    letterSpacing: 0.5,
+    textShadowColor: 'rgba(0, 0, 0, 0.3)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 1,
   },
   modalProductInfo: {
-    gap: getResponsiveSize(12, 14, 16),
-    paddingBottom: getResponsiveSize(20, 22, 24),
+    padding: getResponsiveSize(20, 22, 24),
+    gap: getResponsiveSize(16, 18, 20),
   },
   modalProductName: {
     fontFamily: 'CrimsonPro-SemiBold',
     fontSize: getResponsiveFontSize(24),
     color: '#1A237E',
     letterSpacing: 0.5,
+    lineHeight: getResponsiveFontSize(30),
   },
   modalProductPrice: {
     fontFamily: 'Poppins-SemiBold',
     fontSize: getResponsiveFontSize(20),
-    color: '#D4AF37',
   },
   modalProductSpecs: {
     backgroundColor: 'rgba(232, 234, 246, 0.3)',
-    borderRadius: getResponsiveSize(8, 10, 12),
-    padding: getResponsiveSize(12, 14, 16),
-    gap: getResponsiveSize(8, 9, 10),
+    borderRadius: getResponsiveSize(12, 14, 16),
+    padding: getResponsiveSize(16, 18, 20),
+    gap: getResponsiveSize(12, 14, 16),
   },
   specRow: {
     flexDirection: 'row',
