@@ -75,12 +75,12 @@ export default function CalculatorScreen() {
   
   const [rates, setRates] = useState({
     gold: {
-      '24': 92838,
       '22': 85155,
       '18': 70375,
     },
     silver: {
-      '24': 954,
+      // No purity for silver - just base rate
+      base: 954,
     },
     diamond: {
       '18': 70375,
@@ -93,12 +93,11 @@ export default function CalculatorScreen() {
     const unsubscribe = subscribeToRates((newRates) => {
       setRates({
         gold: {
-          '24': newRates.gold['24KT'],
           '22': newRates.gold['22KT'],
           '18': newRates.gold['18KT'],
         },
         silver: {
-          '24': newRates.silver['24KT'],
+          base: newRates.silver['24KT'], // Use 24KT rate as base for silver
         },
         diamond: {
           '18': newRates.gold['18KT'],
@@ -119,15 +118,12 @@ export default function CalculatorScreen() {
 
   // Reset purity when metal type changes
   useEffect(() => {
-    const availablePurities = Object.keys(rates[metalType]);
-    if (!availablePurities.includes(purity)) {
-      if (metalType === 'gold') {
-        setPurity('22');
-      } else if (metalType === 'silver') {
-        setPurity('24');
-      } else if (metalType === 'diamond') {
-        setPurity('18');
-      }
+    if (metalType === 'gold') {
+      setPurity('22');
+    } else if (metalType === 'silver') {
+      setPurity(''); // No purity for silver
+    } else if (metalType === 'diamond') {
+      setPurity('18');
     }
     // Clear result when switching metal types
     setResult(null);
@@ -160,9 +156,9 @@ export default function CalculatorScreen() {
       const baseRate = currentRates[purity];
       const baseValue = (baseRate * weightValue) / 10;
       
-      // Making charges based on 24KT gold price
-      const gold24Rate = rates.gold['24'];
-      const makingValue = (makingChargesValue / 100) * gold24Rate;
+      // Making charges based on gold 22KT price (since we removed 24KT)
+      const gold22Rate = rates.gold['22'];
+      const makingValue = (makingChargesValue / 100) * gold22Rate;
       
       // Diamond weight calculation
       const diamondValue = diamondWeightValue * diamondWeightPrice;
@@ -181,8 +177,31 @@ export default function CalculatorScreen() {
       
       // Total cost
       totalCost = totalBeforeGST + gstAmount;
+    } else if (metalType === 'silver') {
+      // Silver calculation - no purity, just base rate
+      const baseRate = rates.silver.base;
+      
+      if (!baseRate) {
+        setResult(null);
+        return;
+      }
+      
+      // Calculate base value (rate is per 10g, so divide by 10 to get per gram)
+      const baseValue = (baseRate * weightValue) / 10;
+      
+      // Calculate making charges
+      const makingValue = (baseValue * makingChargesValue) / 100;
+      
+      // Total before GST
+      const totalBeforeGST = baseValue + makingValue;
+      
+      // Calculate GST
+      const gstAmount = (totalBeforeGST * gstValue) / 100;
+      
+      // Total cost
+      totalCost = totalBeforeGST + gstAmount;
     } else {
-      // Regular gold/silver calculation
+      // Gold calculation
       const currentRates = rates[metalType];
       const baseRate = currentRates[purity];
       
@@ -212,11 +231,11 @@ export default function CalculatorScreen() {
 
   const handleMetalTypeChange = (type) => {
     setMetalType(type);
-    // Reset to first available purity for the selected metal
+    // Reset purity based on metal type
     if (type === 'gold') {
       setPurity('22');
     } else if (type === 'silver') {
-      setPurity('24');
+      setPurity(''); // No purity for silver
     } else if (type === 'diamond') {
       setPurity('18');
     }
@@ -227,10 +246,16 @@ export default function CalculatorScreen() {
   };
 
   const getAvailablePurities = () => {
+    if (metalType === 'silver') {
+      return []; // No purity options for silver
+    }
     return Object.keys(rates[metalType]);
   };
 
   const getCurrentRate = () => {
+    if (metalType === 'silver') {
+      return rates.silver.base || 0;
+    }
     return rates[metalType][purity] || 0;
   };
 
@@ -390,42 +415,43 @@ export default function CalculatorScreen() {
               </View>
             </View>
             
-            <View style={styles.formGroup}>
-              <Text style={styles.label}>Purity (KT)</Text>
-              <View style={styles.purityContainer}>
-                {getAvailablePurities().map((key) => (
-                  <TouchableOpacity
-                    key={key}
-                    style={[
-                      styles.purityButton,
-                      purity === key && styles.purityButtonActive,
-                    ]}
-                    onPress={() => handlePurityChange(key)}
-                  >
-                    <LinearGradient
-                      colors={purity === key 
-                        ? (metalType === 'gold' ? ['#D4AF37', '#B8860B'] : 
-                           metalType === 'silver' ? ['#f9f6ef', '#e8e3d3'] : 
-                           ['#E8E3D3', '#D4D0C4'])
-                        : ['#FFFFFF', '#F8F9FA']
-                      }
-                      style={styles.purityGradient}
+            {/* Only show purity for gold and diamond, not for silver */}
+            {metalType !== 'silver' && (
+              <View style={styles.formGroup}>
+                <Text style={styles.label}>Purity (KT)</Text>
+                <View style={styles.purityContainer}>
+                  {getAvailablePurities().map((key) => (
+                    <TouchableOpacity
+                      key={key}
+                      style={[
+                        styles.purityButton,
+                        purity === key && styles.purityButtonActive,
+                      ]}
+                      onPress={() => handlePurityChange(key)}
                     >
-                      <Text
-                        style={[
-                          styles.purityText,
-                          purity === key && (metalType === 'gold' ? styles.purityTextActive : 
-                                           metalType === 'silver' ? styles.purityTextActiveSilver :
-                                           styles.purityTextActiveDiamond),
-                        ]}
+                      <LinearGradient
+                        colors={purity === key 
+                          ? (metalType === 'gold' ? ['#D4AF37', '#B8860B'] : 
+                             ['#E8E3D3', '#D4D0C4'])
+                          : ['#FFFFFF', '#F8F9FA']
+                        }
+                        style={styles.purityGradient}
                       >
-                        {key}KT
-                      </Text>
-                    </LinearGradient>
-                  </TouchableOpacity>
-                ))}
+                        <Text
+                          style={[
+                            styles.purityText,
+                            purity === key && (metalType === 'gold' ? styles.purityTextActive : 
+                                             styles.purityTextActiveDiamond),
+                          ]}
+                        >
+                          {key}KT
+                        </Text>
+                      </LinearGradient>
+                    </TouchableOpacity>
+                  ))}
+                </View>
               </View>
-            </View>
+            )}
 
             {/* Diamond specific fields */}
             {metalType === 'diamond' && (
@@ -562,7 +588,7 @@ export default function CalculatorScreen() {
                 style={styles.rateInfoGradient}
               >
                 <Text style={styles.currentRateLabel}>
-                  Current {metalType === 'gold' ? 'Gold' : metalType === 'silver' ? 'Silver' : 'Diamond'} Rate ({purity}KT):
+                  Current {metalType === 'gold' ? 'Gold' : metalType === 'silver' ? 'Silver' : 'Diamond'} Rate{metalType !== 'silver' ? ` (${purity}KT)` : ''}:
                 </Text>
                 <Text style={styles.currentRateValue} numberOfLines={1} adjustsFontSizeToFit>
                   ₹{getCurrentRate().toLocaleString()} per 10g
