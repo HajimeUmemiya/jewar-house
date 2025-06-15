@@ -10,7 +10,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
-import { ArrowRight, Calculator as CalcIcon } from 'lucide-react-native';
+import { ArrowRight, Calculator as CalcIcon, ChevronDown } from 'lucide-react-native';
 import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import Header from '../../components/Header';
@@ -36,28 +36,53 @@ const getResponsivePadding = () => getResponsiveSize(12, 14, 16, 20);
 const getResponsiveMargin = () => getResponsiveSize(12, 16, 20, 24);
 const getResponsiveFontSize = (baseSize) => getResponsiveSize(baseSize - 2, baseSize - 1, baseSize, baseSize + 2);
 
+// Dropdown options
+const diamondWeightOptions = [
+  { label: '₹35,000', value: 35000 },
+  { label: '₹45,000', value: 45000 },
+  { label: '₹55,000', value: 55000 },
+];
+
+const solitaireWeightOptions = [
+  { label: '₹80,000', value: 80000 },
+  { label: '₹1.25 L', value: 125000 },
+  { label: '₹1.0 L', value: 100000 },
+  { label: '₹1.5 L', value: 150000 },
+  { label: '₹2.0 L', value: 200000 },
+];
+
 export default function CalculatorScreen() {
   const insets = useSafeAreaInsets();
   const [metalType, setMetalType] = useState('gold');
   const [weight, setWeight] = useState('');
-  const [purity, setPurity] = useState('24');
+  const [purity, setPurity] = useState('22');
   const [makingCharges, setMakingCharges] = useState('3.5');
   const [gst, setGst] = useState('3');
   const [result, setResult] = useState(null);
+  
+  // Diamond specific states
+  const [diamondWeight, setDiamondWeight] = useState('');
+  const [diamondWeightPrice, setDiamondWeightPrice] = useState(35000);
+  const [solitaireWeight, setSolitaireWeight] = useState('');
+  const [solitaireWeightPrice, setSolitaireWeightPrice] = useState(80000);
+  const [colorStoneWeight, setColorStoneWeight] = useState('');
+  
+  // Dropdown states
+  const [showDiamondDropdown, setShowDiamondDropdown] = useState(false);
+  const [showSolitaireDropdown, setShowSolitaireDropdown] = useState(false);
+  
   const [rates, setRates] = useState({
     gold: {
       '24': 92838,
       '22': 85155,
-      '20': 77830,
       '18': 70375,
-      '14': 53800,
     },
     silver: {
       '24': 954,
-      '22': 905,
-      '18': 746,
-      '14': 586,
-      '9': 388,
+    },
+    diamond: {
+      '18': 70375,
+      '14': 53800,
     },
   });
 
@@ -68,16 +93,14 @@ export default function CalculatorScreen() {
         gold: {
           '24': newRates.gold['24KT'],
           '22': newRates.gold['22KT'],
-          '20': newRates.gold['20KT'],
           '18': newRates.gold['18KT'],
-          '14': newRates.gold['14KT'],
         },
         silver: {
           '24': newRates.silver['24KT'],
-          '22': newRates.silver['22KT'],
-          '18': newRates.silver['18KT'],
-          '14': newRates.silver['14KT'],
-          '9': newRates.silver['9KT'],
+        },
+        diamond: {
+          '18': newRates.gold['18KT'],
+          '14': newRates.gold['14KT'],
         },
       });
     });
@@ -90,13 +113,19 @@ export default function CalculatorScreen() {
     if (weight && parseFloat(weight) > 0 && result !== null) {
       handleCalculate();
     }
-  }, [weight, purity, makingCharges, gst, metalType, rates]);
+  }, [weight, purity, makingCharges, gst, metalType, rates, diamondWeight, diamondWeightPrice, solitaireWeight, solitaireWeightPrice, colorStoneWeight]);
 
   // Reset purity when metal type changes
   useEffect(() => {
     const availablePurities = Object.keys(rates[metalType]);
     if (!availablePurities.includes(purity)) {
-      setPurity(availablePurities[0] || '24');
+      if (metalType === 'gold') {
+        setPurity('22');
+      } else if (metalType === 'silver') {
+        setPurity('24');
+      } else if (metalType === 'diamond') {
+        setPurity('18');
+      }
     }
     // Clear result when switching metal types
     setResult(null);
@@ -116,28 +145,65 @@ export default function CalculatorScreen() {
       return;
     }
     
-    const currentRates = rates[metalType];
-    const baseRate = currentRates[purity];
+    let totalCost = 0;
     
-    if (!baseRate) {
-      setResult(null);
-      return;
+    if (metalType === 'diamond') {
+      // Diamond calculation logic
+      const diamondWeightValue = parseFloat(diamondWeight) || 0;
+      const solitaireWeightValue = parseFloat(solitaireWeight) || 0;
+      const colorStoneWeightValue = parseFloat(colorStoneWeight) || 0;
+      
+      // Base gold calculation
+      const currentRates = rates[metalType];
+      const baseRate = currentRates[purity];
+      const baseValue = (baseRate * weightValue) / 10;
+      
+      // Making charges based on 24KT gold price
+      const gold24Rate = rates.gold['24'];
+      const makingValue = (makingChargesValue / 100) * gold24Rate;
+      
+      // Diamond weight calculation
+      const diamondValue = diamondWeightValue * diamondWeightPrice;
+      
+      // Solitaire weight calculation
+      const solitaireValue = solitaireWeightValue * solitaireWeightPrice;
+      
+      // Color stone calculation
+      const colorStoneValue = colorStoneWeightValue * 700;
+      
+      // Total before GST
+      const totalBeforeGST = baseValue + makingValue + diamondValue + solitaireValue + colorStoneValue;
+      
+      // Calculate GST
+      const gstAmount = (totalBeforeGST * gstValue) / 100;
+      
+      // Total cost
+      totalCost = totalBeforeGST + gstAmount;
+    } else {
+      // Regular gold/silver calculation
+      const currentRates = rates[metalType];
+      const baseRate = currentRates[purity];
+      
+      if (!baseRate) {
+        setResult(null);
+        return;
+      }
+      
+      // Calculate base value (rate is per 10g, so divide by 10 to get per gram)
+      const baseValue = (baseRate * weightValue) / 10;
+      
+      // Calculate making charges
+      const makingValue = (baseValue * makingChargesValue) / 100;
+      
+      // Total before GST
+      const totalBeforeGST = baseValue + makingValue;
+      
+      // Calculate GST
+      const gstAmount = (totalBeforeGST * gstValue) / 100;
+      
+      // Total cost
+      totalCost = totalBeforeGST + gstAmount;
     }
-    
-    // Calculate base value (rate is per 10g, so divide by 10 to get per gram)
-    const baseValue = (baseRate * weightValue) / 10;
-    
-    // Calculate making charges
-    const makingValue = (baseValue * makingChargesValue) / 100;
-    
-    // Total before GST
-    const totalBeforeGST = baseValue + makingValue;
-    
-    // Calculate GST
-    const gstAmount = (totalBeforeGST * gstValue) / 100;
-    
-    // Total cost
-    const totalCost = totalBeforeGST + gstAmount;
     
     setResult(Math.round(totalCost));
   };
@@ -145,8 +211,13 @@ export default function CalculatorScreen() {
   const handleMetalTypeChange = (type) => {
     setMetalType(type);
     // Reset to first available purity for the selected metal
-    const availablePurities = Object.keys(rates[type]);
-    setPurity(availablePurities[0] || '24');
+    if (type === 'gold') {
+      setPurity('22');
+    } else if (type === 'silver') {
+      setPurity('24');
+    } else if (type === 'diamond') {
+      setPurity('18');
+    }
   };
 
   const handlePurityChange = (newPurity) => {
@@ -160,6 +231,37 @@ export default function CalculatorScreen() {
   const getCurrentRate = () => {
     return rates[metalType][purity] || 0;
   };
+
+  const renderDropdown = (options, selectedValue, onSelect, isVisible, setVisible) => (
+    <View style={styles.dropdownContainer}>
+      <TouchableOpacity
+        style={styles.dropdownButton}
+        onPress={() => setVisible(!isVisible)}
+      >
+        <Text style={styles.dropdownButtonText}>
+          {options.find(opt => opt.value === selectedValue)?.label || 'Select'}
+        </Text>
+        <ChevronDown size={getResponsiveSize(16, 17, 18)} color="#6B7280" />
+      </TouchableOpacity>
+      
+      {isVisible && (
+        <View style={styles.dropdownMenu}>
+          {options.map((option) => (
+            <TouchableOpacity
+              key={option.value}
+              style={styles.dropdownItem}
+              onPress={() => {
+                onSelect(option.value);
+                setVisible(false);
+              }}
+            >
+              <Text style={styles.dropdownItemText}>{option.label}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+    </View>
+  );
 
   return (
     <View style={[styles.container, { paddingTop: insets.top }]}>
@@ -225,6 +327,27 @@ export default function CalculatorScreen() {
                     </Text>
                   </LinearGradient>
                 </TouchableOpacity>
+                <TouchableOpacity
+                  style={[
+                    styles.toggleButton,
+                    metalType === 'diamond' && styles.toggleButtonActive,
+                  ]}
+                  onPress={() => handleMetalTypeChange('diamond')}
+                >
+                  <LinearGradient
+                    colors={metalType === 'diamond' ? ['#E8E3D3', '#D4D0C4'] : ['#F8F9FA', '#FFFFFF']}
+                    style={styles.toggleGradient}
+                  >
+                    <Text
+                      style={[
+                        styles.toggleText,
+                        metalType === 'diamond' && styles.toggleTextActiveDiamond,
+                      ]}
+                    >
+                      Diamond
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
               </View>
             </View>
             
@@ -256,7 +379,9 @@ export default function CalculatorScreen() {
                   >
                     <LinearGradient
                       colors={purity === key 
-                        ? (metalType === 'gold' ? ['#D4AF37', '#B8860B'] : ['#f9f6ef', '#e8e3d3'])
+                        ? (metalType === 'gold' ? ['#D4AF37', '#B8860B'] : 
+                           metalType === 'silver' ? ['#f9f6ef', '#e8e3d3'] : 
+                           ['#E8E3D3', '#D4D0C4'])
                         : ['#FFFFFF', '#F8F9FA']
                       }
                       style={styles.purityGradient}
@@ -264,7 +389,9 @@ export default function CalculatorScreen() {
                       <Text
                         style={[
                           styles.purityText,
-                          purity === key && (metalType === 'gold' ? styles.purityTextActive : styles.purityTextActiveSilver),
+                          purity === key && (metalType === 'gold' ? styles.purityTextActive : 
+                                           metalType === 'silver' ? styles.purityTextActiveSilver :
+                                           styles.purityTextActiveDiamond),
                         ]}
                       >
                         {key}KT
@@ -274,6 +401,71 @@ export default function CalculatorScreen() {
                 ))}
               </View>
             </View>
+
+            {/* Diamond specific fields */}
+            {metalType === 'diamond' && (
+              <>
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Diamond Wt. (grams)</Text>
+                  <View style={styles.inputWithDropdownContainer}>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        style={styles.inputWithDropdown}
+                        value={diamondWeight}
+                        onChangeText={setDiamondWeight}
+                        keyboardType="numeric"
+                        placeholder="Enter diamond weight"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                    </View>
+                    {renderDropdown(
+                      diamondWeightOptions,
+                      diamondWeightPrice,
+                      setDiamondWeightPrice,
+                      showDiamondDropdown,
+                      setShowDiamondDropdown
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Solitaire Wt. (grams)</Text>
+                  <View style={styles.inputWithDropdownContainer}>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        style={styles.inputWithDropdown}
+                        value={solitaireWeight}
+                        onChangeText={setSolitaireWeight}
+                        keyboardType="numeric"
+                        placeholder="Enter solitaire weight"
+                        placeholderTextColor="#9CA3AF"
+                      />
+                    </View>
+                    {renderDropdown(
+                      solitaireWeightOptions,
+                      solitaireWeightPrice,
+                      setSolitaireWeightPrice,
+                      showSolitaireDropdown,
+                      setShowSolitaireDropdown
+                    )}
+                  </View>
+                </View>
+
+                <View style={styles.formGroup}>
+                  <Text style={styles.label}>Color Stone Wt. (grams)</Text>
+                  <View style={styles.inputContainer}>
+                    <TextInput
+                      style={styles.input}
+                      value={colorStoneWeight}
+                      onChangeText={setColorStoneWeight}
+                      keyboardType="numeric"
+                      placeholder="Enter color stone weight"
+                      placeholderTextColor="#9CA3AF"
+                    />
+                  </View>
+                </View>
+              </>
+            )}
             
             <View style={styles.formGroup}>
               <Text style={styles.label}>Making Charges (%)</Text>
@@ -322,7 +514,9 @@ export default function CalculatorScreen() {
                   colors={['#FFF8E1', '#FFFBF0']}
                   style={styles.resultGradient}
                 >
-                  <Text style={styles.resultLabel}>Estimated Price:</Text>
+                  <Text style={styles.resultLabel}>
+                    {metalType === 'diamond' ? 'Estimated Price (Inclusive GST):' : 'Estimated Price:'}
+                  </Text>
                   <Text style={styles.resultValue} numberOfLines={1} adjustsFontSizeToFit>
                     ₹{result.toLocaleString()}
                   </Text>
@@ -339,7 +533,7 @@ export default function CalculatorScreen() {
                 style={styles.rateInfoGradient}
               >
                 <Text style={styles.currentRateLabel}>
-                  Current {metalType === 'gold' ? 'Gold' : 'Silver'} Rate ({purity}KT):
+                  Current {metalType === 'gold' ? 'Gold' : metalType === 'silver' ? 'Silver' : 'Diamond'} Rate ({purity}KT):
                 </Text>
                 <Text style={styles.currentRateValue} numberOfLines={1} adjustsFontSizeToFit>
                   ₹{getCurrentRate().toLocaleString()} per 10g
@@ -411,6 +605,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
+    flex: 1,
   },
   input: {
     borderWidth: 1,
@@ -422,6 +617,76 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(16),
     color: '#1A237E',
     backgroundColor: '#FFFFFF',
+  },
+  inputWithDropdownContainer: {
+    flexDirection: 'row',
+    gap: getResponsiveSize(8, 10, 12),
+    alignItems: 'flex-start',
+  },
+  inputWithDropdown: {
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
+    borderRadius: getResponsiveSize(8, 10, 12),
+    paddingHorizontal: getResponsiveSize(12, 14, 16),
+    paddingVertical: getResponsiveSize(10, 11, 12),
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(16),
+    color: '#1A237E',
+    backgroundColor: '#FFFFFF',
+  },
+  dropdownContainer: {
+    position: 'relative',
+    minWidth: getResponsiveSize(100, 110, 120),
+  },
+  dropdownButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
+    borderRadius: getResponsiveSize(8, 10, 12),
+    paddingHorizontal: getResponsiveSize(12, 14, 16),
+    paddingVertical: getResponsiveSize(10, 11, 12),
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+  },
+  dropdownButtonText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(14),
+    color: '#1A237E',
+    marginRight: getResponsiveSize(4, 5, 6),
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: '100%',
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
+    borderRadius: getResponsiveSize(8, 10, 12),
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    zIndex: 1000,
+    marginTop: getResponsiveSize(4, 5, 6),
+  },
+  dropdownItem: {
+    paddingHorizontal: getResponsiveSize(12, 14, 16),
+    paddingVertical: getResponsiveSize(10, 11, 12),
+    borderBottomWidth: 1,
+    borderBottomColor: '#F3F4F6',
+  },
+  dropdownItemText: {
+    fontFamily: 'Inter-Regular',
+    fontSize: getResponsiveFontSize(14),
+    color: '#1A237E',
   },
   toggleContainer: {
     flexDirection: 'row',
@@ -451,6 +716,9 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   toggleTextActiveSilver: {
+    color: '#8B7355',
+  },
+  toggleTextActiveDiamond: {
     color: '#8B7355',
   },
   purityContainer: {
@@ -486,6 +754,9 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   purityTextActiveSilver: {
+    color: '#8B7355',
+  },
+  purityTextActiveDiamond: {
     color: '#8B7355',
   },
   calculateButton: {
@@ -533,6 +804,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
     marginBottom: getResponsiveSize(6, 7, 8),
     letterSpacing: 0.5,
+    textAlign: 'center',
   },
   resultValue: {
     fontFamily: 'CrimsonPro-SemiBold',
