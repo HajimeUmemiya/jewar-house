@@ -393,7 +393,7 @@ export default function CategorySection() {
         <View style={styles.imageContainer}>
           <Image source={{ uri: product.image }} style={styles.productImage} />
           <LinearGradient
-            colors={['transparent', 'rgba(0, 0, 0, 0.6)']}
+            colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
             style={styles.imageOverlay}
           />
           
@@ -419,7 +419,7 @@ export default function CategorySection() {
 
           {/* Premium Badge */}
           <View style={styles.premiumBadge}>
-            <Star size={getResponsiveSize(10, 11, 12)} color="#FFFFFF" fill="#FFFFFF" />
+            <Star size={getResponsiveSize(8, 9, 10)} color="#FFFFFF" fill="#FFFFFF" />
           </View>
         </View>
 
@@ -428,24 +428,13 @@ export default function CategorySection() {
             {product.name}
           </Text>
           
-          <View style={styles.productMeta}>
-            <Text style={[
-              styles.productPrice,
-              activeToggle === 'gold' && styles.goldPrice,
-              activeToggle === 'diamond' && styles.diamondPrice,
-              activeToggle === 'silver' && styles.silverPrice,
-            ]}>
-              {product.price}
-            </Text>
-            <View style={styles.productSpecs}>
-              <Text style={styles.specText}>{product.weight}</Text>
-              <View style={styles.specDivider} />
-              <Text style={styles.specText}>{product.purity}</Text>
-            </View>
-          </View>
-
-          <Text style={styles.productDescription} numberOfLines={2}>
-            {product.description}
+          <Text style={[
+            styles.productPrice,
+            activeToggle === 'gold' && styles.goldPrice,
+            activeToggle === 'diamond' && styles.diamondPrice,
+            activeToggle === 'silver' && styles.silverPrice,
+          ]}>
+            {product.price}
           </Text>
         </View>
       </LinearGradient>
@@ -662,27 +651,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    gap: getResponsiveSize(12, 14, 16),
+    gap: getResponsiveSize(10, 12, 14),
   },
   productCard: {
-    width: isTablet ? '31%' : isSmallDevice ? '100%' : '48%',
-    borderRadius: getResponsiveSize(16, 18, 20),
+    width: isTablet ? '31%' : '48%',
+    borderRadius: getResponsiveSize(12, 14, 16),
     overflow: 'hidden',
-    elevation: 6,
+    elevation: 4,
     shadowColor: '#1A237E',
-    shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.15,
-    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 4,
     borderWidth: 1,
     borderColor: 'rgba(232, 234, 246, 0.3)',
-    marginBottom: getResponsiveSize(16, 18, 20),
+    marginBottom: getResponsiveSize(12, 14, 16),
   },
   productGradient: {
     flex: 1,
   },
   imageContainer: {
     position: 'relative',
-    height: getResponsiveSize(180, 200, 220),
+    height: getResponsiveSize(140, 160, 180),
   },
   productImage: {
     width: '100%',
@@ -694,24 +683,24 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    height: '40%',
+    height: '30%',
   },
   categoryBadge: {
     position: 'absolute',
-    top: getResponsiveSize(10, 12, 14),
-    left: getResponsiveSize(10, 12, 14),
-    borderRadius: getResponsiveSize(12, 14, 16),
+    top: getResponsiveSize(8, 10, 12),
+    left: getResponsiveSize(8, 10, 12),
+    borderRadius: getResponsiveSize(10, 12, 14),
     overflow: 'hidden',
   },
   badgeGradient: {
-    paddingHorizontal: getResponsiveSize(8, 10, 12),
-    paddingVertical: getResponsiveSize(4, 5, 6),
+    paddingHorizontal: getResponsiveSize(6, 8, 10),
+    paddingVertical: getResponsiveSize(3, 4, 5),
   },
   badgeText: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(10),
+    fontSize: getResponsiveFontSize(9),
     color: '#FFFFFF',
-    letterSpacing: 0.5,
+    letterSpacing: 0.3,
     textShadowColor: 'rgba(0, 0, 0, 0.3)',
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 1,
@@ -722,29 +711,26 @@ const styles = StyleSheet.create({
   },
   premiumBadge: {
     position: 'absolute',
-    top: getResponsiveSize(10, 12, 14),
-    right: getResponsiveSize(10, 12, 14),
+    top: getResponsiveSize(8, 10, 12),
+    right: getResponsiveSize(8, 10, 12),
     backgroundColor: 'rgba(212, 175, 55, 0.9)',
-    borderRadius: getResponsiveSize(12, 14, 16),
-    padding: getResponsiveSize(6, 7, 8),
+    borderRadius: getResponsiveSize(10, 12, 14),
+    padding: getResponsiveSize(4, 5, 6),
   },
   productInfo: {
-    padding: getResponsiveSize(12, 14, 16),
-    gap: getResponsiveSize(8, 9, 10),
+    padding: getResponsiveSize(10, 12, 14),
+    gap: getResponsiveSize(6, 7, 8),
   },
   productName: {
     fontFamily: 'CrimsonPro-SemiBold',
-    fontSize: getResponsiveFontSize(16),
+    fontSize: getResponsiveFontSize(14),
     color: '#1A237E',
     letterSpacing: 0.3,
-    lineHeight: getResponsiveFontSize(20),
-  },
-  productMeta: {
-    gap: getResponsiveSize(6, 7, 8),
+    lineHeight: getResponsiveFontSize(18),
   },
   productPrice: {
     fontFamily: 'Poppins-SemiBold',
-    fontSize: getResponsiveFontSize(16),
+    fontSize: getResponsiveFontSize(15),
   },
   goldPrice: {
     color: '#D4AF37',
@@ -754,27 +740,6 @@ const styles = StyleSheet.create({
   },
   silverPrice: {
     color: '#8B7355',
-  },
-  productSpecs: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: getResponsiveSize(8, 9, 10),
-  },
-  specText: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(12),
-    color: '#6B7280',
-  },
-  specDivider: {
-    width: 1,
-    height: getResponsiveSize(12, 14, 16),
-    backgroundColor: '#E8EAF6',
-  },
-  productDescription: {
-    fontFamily: 'Inter-Regular',
-    fontSize: getResponsiveFontSize(13),
-    color: '#6B7280',
-    lineHeight: getResponsiveFontSize(18),
   },
   // Modal Styles
   modalOverlay: {
