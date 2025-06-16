@@ -47,8 +47,8 @@ const diamondWeightOptions = [
 
 const solitaireWeightOptions = [
   { label: '₹80,000', value: 80000 },
-  { label: '₹1.25 L', value: 125000 },
   { label: '₹1.0 L', value: 100000 },
+  { label: '₹1.25 L', value: 125000 },
   { label: '₹1.5 L', value: 150000 },
   { label: '₹2.0 L', value: 200000 },
 ];
