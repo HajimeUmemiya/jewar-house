@@ -23,7 +23,7 @@ function calculatePurities(base24kt, metalType = 'gold') {
 }
 
 /**
- * Validate rate data structure
+ * Validate rate data structure with more lenient checks
  */
 function validateRates(rates) {
   if (!rates || typeof rates !== 'object') {
@@ -43,17 +43,22 @@ function validateRates(rates) {
     return false;
   }
   
-  // Sanity check: gold should be more expensive than silver
-  if (goldRate <= silverRate) {
+  // More lenient sanity checks
+  if (goldRate <= 0 || silverRate <= 0) {
     return false;
   }
   
-  // Check reasonable ranges (USD per troy ounce)
-  if (goldRate < 1000 || goldRate > 5000) {
+  // Sanity check: gold should be more expensive than silver (but allow some flexibility)
+  if (goldRate <= silverRate * 0.8) {
     return false;
   }
   
-  if (silverRate < 10 || silverRate > 100) {
+  // More reasonable ranges (USD per troy ounce) - updated for 2024/2025
+  if (goldRate < 800 || goldRate > 8000) {
+    return false;
+  }
+  
+  if (silverRate < 5 || silverRate > 200) {
     return false;
   }
   
@@ -105,11 +110,30 @@ function gramsToTroyOunce(grams) {
   return grams / 31.1035;
 }
 
+/**
+ * Validate exchange rate
+ */
+function validateExchangeRate(rate) {
+  const exchangeRate = parseFloat(rate);
+  
+  if (isNaN(exchangeRate) || exchangeRate <= 0) {
+    return false;
+  }
+  
+  // USD to INR should be between 70-100 (reasonable range)
+  if (exchangeRate < 70 || exchangeRate > 100) {
+    return false;
+  }
+  
+  return true;
+}
+
 module.exports = {
   calculatePurities,
   validateRates,
   calculatePercentageChange,
   formatRate,
   troyOunceToGrams,
-  gramsToTroyOunce
+  gramsToTroyOunce,
+  validateExchangeRate
 };
