@@ -2,7 +2,9 @@ import { format } from 'date-fns';
 
 // Environment configuration
 const API_CONFIG = {
-  // Using multiple free APIs for redundancy
+  // Backend API URL
+  url: process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3001/api',
+  key: process.env.EXPO_PUBLIC_API_KEY || '',
   updateInterval: parseInt(process.env.EXPO_PUBLIC_RATE_UPDATE_INTERVAL || '30000'), // 30 seconds
   enableLiveRates: process.env.EXPO_PUBLIC_ENABLE_LIVE_RATES !== 'false', // Default to true
 };
@@ -37,69 +39,8 @@ let currentRates = {
   ...DEFAULT_RATES,
 };
 
-// USD to INR conversion rate (updated periodically)
-let usdToInr = 83.50; // Default rate, will be updated from API
-let lastCurrencyUpdate = 0;
-const CURRENCY_UPDATE_INTERVAL = 300000; // 5 minutes
-
-// Function to get USD to INR exchange rate with caching
-const getUsdToInrRate = async () => {
-  const now = Date.now();
-  
-  // Only update currency rate every 5 minutes
-  if (now - lastCurrencyUpdate < CURRENCY_UPDATE_INTERVAL) {
-    return true;
-  }
-
-  try {
-    console.log('💱 Fetching USD to INR rate...');
-    const response = await fetch('https://api.exchangerate-api.com/v4/latest/USD', {
-      headers: {
-        'User-Agent': 'JewarHouse/1.0',
-      },
-    });
-    
-    if (response.ok) {
-      const data = await response.json();
-      if (data.rates && data.rates.INR) {
-        const newRate = data.rates.INR;
-        if (Math.abs(newRate - usdToInr) > 0.1) { // Only update if significant change
-          usdToInr = newRate;
-          lastCurrencyUpdate = now;
-          console.log(`✅ Updated USD to INR rate: ${usdToInr}`);
-        }
-        return true;
-      }
-    }
-  } catch (error) {
-    console.warn('❌ Failed to fetch USD to INR rate:', error.message);
-  }
-  return false;
-};
-
-// Function to convert USD per troy ounce to INR per 10 grams
-const convertToIndianRates = (usdPerOunce) => {
-  // 1 troy ounce = 31.1035 grams
-  const gramsPerTroyOunce = 31.1035;
-  const usdPer10Grams = (usdPerOunce * 10) / gramsPerTroyOunce;
-  const inrPer10Grams = usdPer10Grams * usdToInr;
-  return Math.round(inrPer10Grams);
-};
-
-// Function to calculate different purities from 24KT base rate
-const calculatePurities = (base24kt) => {
-  return {
-    '24KT': base24kt,
-    '22KT': Math.round(base24kt * (22/24)),
-    '20KT': Math.round(base24kt * (20/24)),
-    '18KT': Math.round(base24kt * (18/24)),
-    '14KT': Math.round(base24kt * (14/24)),
-    '9KT': Math.round(base24kt * (9/24)), // For silver
-  };
-};
-
-// Enhanced free API sources with better error handling
-const fetchFromFreeApis = async () => {
+// Function to fetch rates from backend API
+const fetchRatesFromAPI = async () => {
   const now = Date.now();
   
   // Rate limiting: Don't call APIs too frequently
@@ -108,135 +49,46 @@ const fetchFromFreeApis = async () => {
     return null;
   }
 
-  const apis = [
-    {
-      name: 'Metals-API (Free)',
-      url: 'https://api.metals.live/v1/spot',
-      timeout: 5000,
-      transform: (data) => {
-        // Try different possible field names
-        const gold = data.gold || data.XAU || data.GOLD || data.au;
-        const silver = data.silver || data.XAG || data.SILVER || data.ag;
-        return { gold, silver };
-      }
-    },
-    {
-      name: 'Alternative Metals API',
-      url: 'https://api.metalpriceapi.com/v1/latest?api_key=demo&base=USD&symbols=XAU,XAG',
-      timeout: 5000,
-      transform: (data) => {
-        const rates = data.rates || {};
+  try {
+    console.log('🚀 Fetching rates from backend API...');
+    
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add API key if available
+    if (API_CONFIG.key) {
+      headers['Authorization'] = `Bearer ${API_CONFIG.key}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.url}/rates`, {
+      method: 'GET',
+      headers,
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log('✅ Successfully fetched from backend API');
+      lastApiCallTime = now;
+      
+      if (data.success && data.data) {
         return {
-          gold: rates.XAU ? (1 / rates.XAU) : null, // Convert to USD per ounce
-          silver: rates.XAG ? (1 / rates.XAG) : null
+          lastUpdated: new Date(data.data.lastUpdated),
+          gold: data.data.gold,
+          silver: data.data.silver,
         };
       }
-    },
-    {
-      name: 'Backup Metals API',
-      url: 'https://api.metals.live/v1/spot/gold,silver',
-      timeout: 5000,
-      transform: (data) => {
-        return {
-          gold: data.gold || data.XAU,
-          silver: data.silver || data.XAG
-        };
-      }
+    } else {
+      console.warn(`❌ Backend API returned status ${response.status}`);
     }
-  ];
-
-  for (const api of apis) {
-    try {
-      console.log(`🔄 Trying ${api.name}...`);
-      
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), api.timeout);
-      
-      const response = await fetch(api.url, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'JewarHouse/1.0',
-          'Accept': 'application/json',
-        },
-        signal: controller.signal,
-      });
-
-      clearTimeout(timeoutId);
-
-      if (response.ok) {
-        const data = await response.json();
-        console.log(`📊 Raw data from ${api.name}:`, JSON.stringify(data).substring(0, 200) + '...');
-        
-        const rates = api.transform(data);
-        console.log(`🔄 Transformed rates:`, rates);
-        
-        if (rates.gold && rates.silver && rates.gold > 0 && rates.silver > 0) {
-          console.log(`✅ Successfully fetched from ${api.name}`);
-          lastApiCallTime = now;
-          return rates;
-        } else {
-          console.warn(`⚠️ ${api.name} returned incomplete data`);
-        }
-      } else {
-        console.warn(`❌ ${api.name} returned status ${response.status}`);
-      }
-    } catch (error) {
-      if (error.name === 'AbortError') {
-        console.warn(`⏰ ${api.name} timed out`);
-      } else {
-        console.warn(`❌ ${api.name} failed:`, error.message);
-      }
-    }
+  } catch (error) {
+    console.warn('❌ Backend API failed:', error.message);
   }
   
   return null;
 };
 
-// Enhanced rate fetching with better error handling
-const fetchRatesFromAPI = async () => {
-  try {
-    console.log('🚀 Starting rate fetch process...');
-    
-    // First, update USD to INR rate (with caching)
-    await getUsdToInrRate();
-
-    // Try to fetch from free APIs
-    const apiRates = await fetchFromFreeApis();
-    
-    if (apiRates && apiRates.gold && apiRates.silver) {
-      // Validate rates are reasonable (basic sanity check)
-      if (apiRates.gold > 1000 && apiRates.gold < 5000 && 
-          apiRates.silver > 10 && apiRates.silver < 100) {
-        
-        // Convert to Indian rates (INR per 10 grams)
-        const goldInr = convertToIndianRates(apiRates.gold);
-        const silverInr = convertToIndianRates(apiRates.silver);
-
-        const transformedRates = {
-          lastUpdated: new Date(),
-          gold: calculatePurities(goldInr),
-          silver: calculatePurities(silverInr),
-        };
-
-        console.log(`💰 Live Rates - Gold 24KT: ₹${transformedRates.gold['24KT']}/10g, Silver 24KT: ₹${transformedRates.silver['24KT']}/10g`);
-        return transformedRates;
-      } else {
-        console.warn('⚠️ API rates failed sanity check, using simulation');
-      }
-    }
-
-    // If APIs fail, simulate realistic market movements
-    console.log('📈 APIs unavailable, simulating realistic market movements...');
-    return simulateRealisticRates();
-
-  } catch (error) {
-    console.error('❌ Error fetching rates:', error.message);
-    return simulateRealisticRates();
-  }
-};
-
-// Enhanced realistic market simulation
+// Enhanced realistic market simulation (fallback when API is unavailable)
 const simulateRealisticRates = () => {
   console.log('🎯 Generating realistic market simulation...');
   
@@ -373,7 +225,15 @@ const startLiveUpdates = () => {
 const updateRates = async () => {
   try {
     console.log('🔄 Updating rates...');
-    const newRates = await fetchRatesFromAPI();
+    
+    // Try to fetch from backend API first
+    let newRates = await fetchRatesFromAPI();
+    
+    // If backend API fails, use simulation
+    if (!newRates) {
+      console.log('📈 Backend API unavailable, using simulation');
+      newRates = simulateRealisticRates();
+    }
     
     // Check for significant changes (> 0.05% to reduce noise)
     const hasSignificantChange = checkSignificantChange(currentRates, newRates);
@@ -455,7 +315,15 @@ export const subscribeToRates = (callback) => {
 // Fetch current rates (force refresh)
 export const fetchRates = async () => {
   console.log('🔄 Manual rate fetch requested');
-  const freshRates = await fetchRatesFromAPI();
+  
+  // Try backend API first
+  let freshRates = await fetchRatesFromAPI();
+  
+  // If backend API fails, use simulation
+  if (!freshRates) {
+    freshRates = simulateRealisticRates();
+  }
+  
   currentRates = freshRates;
   
   // Notify subscribers of manual update
@@ -486,88 +354,12 @@ export const getCurrentRates = () => currentRates;
 
 // Export configuration for debugging
 export const getConfig = () => ({
+  apiUrl: API_CONFIG.url,
+  hasApiKey: !!API_CONFIG.key,
   updateInterval: API_CONFIG.updateInterval,
   enableLiveRates: API_CONFIG.enableLiveRates,
   subscriberCount: subscribers.size,
   lastUpdate: currentRates.lastUpdated,
-  usdToInrRate: usdToInr,
   isUpdating: !!updateInterval,
   lastApiCall: new Date(lastApiCallTime).toISOString(),
-  lastCurrencyUpdate: new Date(lastCurrencyUpdate).toISOString(),
 });
-
-// Health check function
-export const checkApiHealth = async () => {
-  try {
-    console.log('🏥 Checking API health...');
-    
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
-    
-    const response = await fetch('https://api.metals.live/v1/spot', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'User-Agent': 'JewarHouse/1.0',
-      },
-      signal: controller.signal,
-    });
-
-    clearTimeout(timeoutId);
-
-    if (response.ok) {
-      const data = await response.json();
-      return {
-        status: 'healthy',
-        message: 'Free API is responding correctly',
-        data: {
-          gold: data.gold || 'N/A',
-          silver: data.silver || 'N/A',
-          timestamp: new Date().toISOString()
-        }
-      };
-    } else {
-      return {
-        status: 'error',
-        message: `API returned ${response.status}`,
-      };
-    }
-  } catch (error) {
-    return {
-      status: 'error',
-      message: error.name === 'AbortError' ? 'API timeout' : error.message,
-    };
-  }
-};
-
-// Get market status
-export const getMarketStatus = () => {
-  const now = new Date();
-  const hour = now.getHours();
-  const day = now.getDay();
-  
-  const isWeekday = day >= 1 && day <= 5;
-  const isMarketHours = hour >= 9 && hour < 17;
-  
-  return {
-    isOpen: isWeekday && isMarketHours,
-    nextOpen: isWeekday ? 
-      (hour < 9 ? 'Today at 9:00 AM' : 'Tomorrow at 9:00 AM') :
-      'Monday at 9:00 AM',
-    status: (isWeekday && isMarketHours) ? 'OPEN' : 'CLOSED',
-    volatility: getTimeBasedVolatility(),
-    sentiment: getMarketSentiment(),
-  };
-};
-
-// Get rate statistics for the current session
-export const getRateStatistics = () => {
-  // This would typically track min/max/average over time
-  // For now, return basic info
-  return {
-    currentRates: currentRates,
-    marketStatus: getMarketStatus(),
-    config: getConfig(),
-    lastUpdate: formatDate(currentRates.lastUpdated),
-  };
-};
