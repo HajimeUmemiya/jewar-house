@@ -9,7 +9,7 @@ const API_CONFIG = {
   enableLiveRates: process.env.EXPO_PUBLIC_ENABLE_LIVE_RATES !== 'false', // Default to true
 };
 
-// Updated default rates based on current market prices (per 10g)
+// Updated default rates based on current market prices (per 10g) - January 2025
 const DEFAULT_RATES = {
   gold: {
     '24KT': parseInt(process.env.EXPO_PUBLIC_DEFAULT_GOLD_24KT || '99150'),
