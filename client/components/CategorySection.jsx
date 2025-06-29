@@ -447,14 +447,12 @@ export default function CategorySection() {
       transparent={true}
       visible={productModalVisible}
       onRequestClose={closeProductModal}
+      statusBarTranslucent={true}
     >
       <View style={styles.modalOverlay}>
         <Pressable style={styles.modalBackdrop} onPress={closeProductModal} />
         <View style={styles.modalContainer}>
-          <LinearGradient
-            colors={['#FFFFFF', '#FAFAFA']}
-            style={styles.modalGradient}
-          >
+          <View style={styles.modalContent}>
             {selectedProduct && (
               <>
                 <View style={styles.modalHeader}>
@@ -467,7 +465,7 @@ export default function CategorySection() {
                   </TouchableOpacity>
                 </View>
 
-                <ScrollView style={styles.modalContent}>
+                <ScrollView style={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
                   <View style={styles.modalImageContainer}>
                     <Image source={{ uri: selectedProduct.image }} style={styles.modalImage} />
                     <LinearGradient
@@ -556,7 +554,7 @@ export default function CategorySection() {
                 </View>
               </>
             )}
-          </LinearGradient>
+          </View>
         </View>
       </View>
     </Modal>
@@ -741,9 +739,10 @@ const styles = StyleSheet.create({
   silverPrice: {
     color: '#8B7355',
   },
-  // Modal Styles
+  // Fixed Modal Styles
   modalOverlay: {
     flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker, more opaque background
     justifyContent: 'flex-end',
   },
   modalBackdrop: {
@@ -752,21 +751,22 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    backgroundColor: 'transparent', // Let the overlay handle the background
   },
   modalContainer: {
     maxHeight: '90%',
+    backgroundColor: '#FFFFFF', // Solid white background
     borderTopLeftRadius: getResponsiveSize(20, 22, 24),
     borderTopRightRadius: getResponsiveSize(20, 22, 24),
-    overflow: 'hidden',
-    elevation: 10,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
+    elevation: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
   },
-  modalGradient: {
+  modalContent: {
     flex: 1,
+    backgroundColor: '#FFFFFF', // Ensure content has solid background
   },
   modalHeader: {
     flexDirection: 'row',
@@ -776,6 +776,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: getResponsiveSize(20, 22, 24),
     borderBottomWidth: 1,
     borderBottomColor: '#E8EAF6',
+    backgroundColor: '#FFFFFF', // Solid background for header
   },
   modalTitle: {
     fontFamily: 'CrimsonPro-SemiBold',
@@ -784,16 +785,23 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   closeButton: {
-    padding: getResponsiveSize(4, 5, 6),
-    borderRadius: getResponsiveSize(12, 14, 16),
-    backgroundColor: 'rgba(107, 114, 128, 0.1)',
+    padding: getResponsiveSize(8, 9, 10),
+    borderRadius: getResponsiveSize(20, 22, 24),
+    backgroundColor: '#F3F4F6',
+    elevation: 2,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
   },
-  modalContent: {
+  modalScrollContent: {
     flex: 1,
+    backgroundColor: '#FFFFFF', // Solid background for scroll content
   },
   modalImageContainer: {
     position: 'relative',
     height: getResponsiveSize(250, 280, 320),
+    backgroundColor: '#F8F9FA', // Fallback background
   },
   modalImage: {
     width: '100%',
@@ -813,6 +821,11 @@ const styles = StyleSheet.create({
     left: getResponsiveSize(16, 18, 20),
     borderRadius: getResponsiveSize(16, 18, 20),
     overflow: 'hidden',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
   },
   modalBadgeGradient: {
     paddingHorizontal: getResponsiveSize(12, 14, 16),
@@ -830,6 +843,7 @@ const styles = StyleSheet.create({
   modalProductInfo: {
     padding: getResponsiveSize(20, 22, 24),
     gap: getResponsiveSize(16, 18, 20),
+    backgroundColor: '#FFFFFF', // Solid background
   },
   modalProductName: {
     fontFamily: 'CrimsonPro-SemiBold',
@@ -843,10 +857,12 @@ const styles = StyleSheet.create({
     fontSize: getResponsiveFontSize(20),
   },
   modalProductSpecs: {
-    backgroundColor: 'rgba(232, 234, 246, 0.3)',
+    backgroundColor: '#F8F9FA',
     borderRadius: getResponsiveSize(12, 14, 16),
     padding: getResponsiveSize(16, 18, 20),
     gap: getResponsiveSize(12, 14, 16),
+    borderWidth: 1,
+    borderColor: '#E8EAF6',
   },
   specRow: {
     flexDirection: 'row',
@@ -875,16 +891,17 @@ const styles = StyleSheet.create({
     padding: getResponsiveSize(20, 22, 24),
     borderTopWidth: 1,
     borderTopColor: '#E8EAF6',
+    backgroundColor: '#FFFFFF', // Solid background for actions
   },
   modalActionButton: {
     flex: 1,
     borderRadius: getResponsiveSize(12, 14, 16),
     overflow: 'hidden',
-    elevation: 3,
+    elevation: 4,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
-    shadowRadius: 3,
+    shadowRadius: 4,
   },
   modalActionGradient: {
     flexDirection: 'row',
