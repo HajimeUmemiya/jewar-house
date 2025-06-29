@@ -45,13 +45,10 @@ const fetchRatesFromAPI = async () => {
   
   // Rate limiting: Don't call APIs too frequently
   if (now - lastApiCallTime < API_CALL_COOLDOWN) {
-    console.log('⏳ API call cooldown active, skipping external fetch');
     return null;
   }
 
   try {
-    console.log('🚀 Fetching rates from backend API...');
-    
     const headers = {
       'Content-Type': 'application/json',
     };
@@ -68,7 +65,6 @@ const fetchRatesFromAPI = async () => {
 
     if (response.ok) {
       const data = await response.json();
-      console.log('✅ Successfully fetched from backend API');
       lastApiCallTime = now;
       
       if (data.success && data.data) {
@@ -78,11 +74,10 @@ const fetchRatesFromAPI = async () => {
           silver: data.data.silver,
         };
       }
-    } else {
-      console.warn(`❌ Backend API returned status ${response.status}`);
     }
   } catch (error) {
-    console.warn('❌ Backend API failed:', error.message);
+    // Only log critical API failures
+    console.error('Backend API failed:', error.message);
   }
   
   return null;
@@ -90,8 +85,6 @@ const fetchRatesFromAPI = async () => {
 
 // Enhanced realistic market simulation (fallback when API is unavailable)
 const simulateRealisticRates = () => {
-  console.log('🎯 Generating realistic market simulation...');
-  
   // Market factors simulation
   const marketFactors = {
     // Time-based volatility (higher during market hours)
@@ -103,8 +96,6 @@ const simulateRealisticRates = () => {
     // Weekly trend (slight bias based on day of week)
     weeklyTrend: getWeeklyTrend(),
   };
-
-  console.log('📊 Market factors:', marketFactors);
 
   // Calculate realistic fluctuations
   const goldFluctuation = calculateRealisticFluctuation('gold', marketFactors);
@@ -127,8 +118,6 @@ const simulateRealisticRates = () => {
       '9KT': Math.round(currentRates.silver['9KT'] * (1 + silverFluctuation)),
     },
   };
-
-  console.log(`📈 Simulated Rates - Gold: ${goldFluctuation > 0 ? '+' : ''}${(goldFluctuation * 100).toFixed(3)}%, Silver: ${silverFluctuation > 0 ? '+' : ''}${(silverFluctuation * 100).toFixed(3)}%`);
   
   return newRates;
 };
@@ -201,37 +190,28 @@ const calculateRealisticFluctuation = (metal, factors) => {
 // Function to start live updates
 const startLiveUpdates = () => {
   if (!API_CONFIG.enableLiveRates) {
-    console.log('📴 Live rates disabled in configuration');
     return;
   }
 
   if (updateInterval) {
-    console.log('🔄 Live updates already running');
     return;
   }
-
-  console.log('🚀 Starting live rate updates...');
   
   // Initial fetch
   updateRates();
   
   // Set up polling interval
   updateInterval = setInterval(updateRates, API_CONFIG.updateInterval);
-  
-  console.log(`⏰ Live updates scheduled every ${API_CONFIG.updateInterval / 1000} seconds`);
 };
 
 // Function to update rates and notify subscribers
 const updateRates = async () => {
   try {
-    console.log('🔄 Updating rates...');
-    
     // Try to fetch from backend API first
     let newRates = await fetchRatesFromAPI();
     
     // If backend API fails, use simulation
     if (!newRates) {
-      console.log('📈 Backend API unavailable, using simulation');
       newRates = simulateRealisticRates();
     }
     
@@ -239,24 +219,21 @@ const updateRates = async () => {
     const hasSignificantChange = checkSignificantChange(currentRates, newRates);
     
     if (hasSignificantChange || !currentRates.lastUpdated) {
-      console.log('📊 Significant rate changes detected, updating subscribers');
       currentRates = newRates;
       
       // Notify all subscribers
-      console.log(`📢 Notifying ${subscribers.size} subscribers`);
       subscribers.forEach(callback => {
         try {
           callback(currentRates);
         } catch (error) {
-          console.error('❌ Error notifying subscriber:', error);
+          console.error('Error notifying subscriber:', error);
         }
       });
     } else {
-      console.log('📈 No significant changes, updating timestamp only');
       currentRates.lastUpdated = newRates.lastUpdated;
     }
   } catch (error) {
-    console.error('❌ Error during rate update:', error);
+    console.error('Error during rate update:', error);
   }
 };
 
@@ -267,19 +244,12 @@ const checkSignificantChange = (oldRates, newRates) => {
   const goldChange = Math.abs((newRates.gold['24KT'] - oldRates.gold['24KT']) / oldRates.gold['24KT']);
   const silverChange = Math.abs((newRates.silver['24KT'] - oldRates.silver['24KT']) / oldRates.silver['24KT']);
   
-  const hasChange = goldChange > threshold || silverChange > threshold;
-  
-  if (hasChange) {
-    console.log(`📊 Rate changes - Gold: ${(goldChange * 100).toFixed(3)}%, Silver: ${(silverChange * 100).toFixed(3)}%`);
-  }
-  
-  return hasChange;
+  return goldChange > threshold || silverChange > threshold;
 };
 
 // Function to stop live updates
 const stopLiveUpdates = () => {
   if (updateInterval) {
-    console.log('⏹️ Stopping live rate updates');
     clearInterval(updateInterval);
     updateInterval = null;
   }
@@ -287,7 +257,6 @@ const stopLiveUpdates = () => {
 
 // Subscribe to rate updates
 export const subscribeToRates = (callback) => {
-  console.log('📝 New subscriber added');
   subscribers.add(callback);
   
   // Start live updates if not already running
@@ -297,12 +266,11 @@ export const subscribeToRates = (callback) => {
   try {
     callback(currentRates);
   } catch (error) {
-    console.error('❌ Error calling initial callback:', error);
+    console.error('Error calling initial callback:', error);
   }
   
   // Return unsubscribe function
   return () => {
-    console.log('📝 Subscriber removed');
     subscribers.delete(callback);
     
     // If no more subscribers, stop live updates
@@ -314,8 +282,6 @@ export const subscribeToRates = (callback) => {
 
 // Fetch current rates (force refresh)
 export const fetchRates = async () => {
-  console.log('🔄 Manual rate fetch requested');
-  
   // Try backend API first
   let freshRates = await fetchRatesFromAPI();
   
@@ -331,7 +297,7 @@ export const fetchRates = async () => {
     try {
       callback(currentRates);
     } catch (error) {
-      console.error('❌ Error notifying subscriber during manual fetch:', error);
+      console.error('Error notifying subscriber during manual fetch:', error);
     }
   });
   
@@ -340,7 +306,6 @@ export const fetchRates = async () => {
 
 // Manual rate refresh function for pull-to-refresh
 export const refreshRates = async () => {
-  console.log('🔄 Manual refresh triggered');
   return await fetchRates();
 };
 
