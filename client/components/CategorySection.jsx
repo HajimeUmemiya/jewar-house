@@ -468,28 +468,25 @@ export default function CategorySection() {
                 <ScrollView style={styles.modalScrollContent} showsVerticalScrollIndicator={false}>
                   <View style={styles.modalImageContainer}>
                     <Image source={{ uri: selectedProduct.image }} style={styles.modalImage} />
-                    <LinearGradient
-                      colors={['transparent', 'rgba(0, 0, 0, 0.4)']}
-                      style={styles.modalImageOverlay}
-                    />
+                    {/* DEBUG: Temporarily removed LinearGradient */}
+                    <View style={[styles.modalImageOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]} />
                     
                     <View style={styles.modalCategoryBadge}>
-                      <LinearGradient
-                        colors={activeToggle === 'gold' 
-                          ? ['#D4AF37', '#B8860B'] 
+                      {/* DEBUG: Temporarily removed LinearGradient */}
+                      <View style={[styles.modalBadgeGradient, { 
+                        backgroundColor: activeToggle === 'gold' 
+                          ? '#D4AF37' 
                           : activeToggle === 'diamond'
-                          ? ['#E8E3D3', '#D4D0C4']
-                          : ['#8B7355', '#6B5B47']
-                        }
-                        style={styles.modalBadgeGradient}
-                      >
+                          ? '#E8E3D3'
+                          : '#8B7355'
+                      }]}>
                         <Text style={[
                           styles.modalBadgeText,
                           activeToggle === 'diamond' && styles.diamondBadgeText
                         ]}>
                           {selectedProduct.category}
                         </Text>
-                      </LinearGradient>
+                      </View>
                     </View>
                   </View>
                   
@@ -530,26 +527,22 @@ export default function CategorySection() {
                     style={styles.modalActionButton}
                     onPress={handleStoreLocation}
                   >
-                    <LinearGradient
-                      colors={['#1A237E', '#283593']}
-                      style={styles.modalActionGradient}
-                    >
+                    {/* DEBUG: Temporarily removed LinearGradient */}
+                    <View style={[styles.modalActionGradient, { backgroundColor: '#1A237E' }]}>
                       <MapPin size={getResponsiveSize(16, 18, 20)} color="#FFFFFF" />
                       <Text style={styles.modalActionText}>Visit Store</Text>
-                    </LinearGradient>
+                    </View>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.modalActionButton}
                     onPress={handleWhatsApp}
                   >
-                    <LinearGradient
-                      colors={['#25D366', '#128C7E']}
-                      style={styles.modalActionGradient}
-                    >
+                    {/* DEBUG: Temporarily removed LinearGradient */}
+                    <View style={[styles.modalActionGradient, { backgroundColor: '#25D366' }]}>
                       <MessageCircle size={getResponsiveSize(16, 18, 20)} color="#FFFFFF" />
                       <Text style={styles.modalActionText}>Chat</Text>
-                    </LinearGradient>
+                    </View>
                   </TouchableOpacity>
                 </View>
               </>
@@ -742,7 +735,7 @@ const styles = StyleSheet.create({
   // Fixed Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker, more opaque background
+    backgroundColor: 'red', // DEBUG: Solid red background for testing
     justifyContent: 'flex-end',
   },
   modalBackdrop: {
@@ -755,7 +748,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     maxHeight: '90%',
-    backgroundColor: '#FFFFFF', // Solid white background
+    backgroundColor: 'blue', // DEBUG: Solid blue background for testing
     borderTopLeftRadius: getResponsiveSize(20, 22, 24),
     borderTopRightRadius: getResponsiveSize(20, 22, 24),
     elevation: 20,
@@ -766,7 +759,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Ensure content has solid background
+    backgroundColor: 'green', // DEBUG: Solid green background for testing
   },
   modalHeader: {
     flexDirection: 'row',
