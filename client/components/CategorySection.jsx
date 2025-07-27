@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Dimensions, ScrollView, Modal, Pressable } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { X, MapPin, MessageCircle, Star } from 'lucide-react-native';
 import { Linking } from 'react-native';
@@ -451,7 +452,7 @@ export default function CategorySection() {
     >
       <View style={styles.modalOverlay}>
         <Pressable style={styles.modalBackdrop} onPress={closeProductModal} />
-        <View style={styles.modalContainer}>
+        <SafeAreaView style={styles.modalContainer}>
           <View style={styles.modalContent}>
             {selectedProduct && (
               <>
@@ -555,7 +556,7 @@ export default function CategorySection() {
               </>
             )}
           </View>
-        </View>
+        </SafeAreaView>
       </View>
     </Modal>
   );
@@ -742,7 +743,7 @@ const styles = StyleSheet.create({
   // Fixed Modal Styles
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)', // Darker, more opaque background
+    backgroundColor: 'rgba(0, 0, 0, 0.8)', // Ensure strong overlay
     justifyContent: 'flex-end',
   },
   modalBackdrop: {
@@ -751,11 +752,11 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'transparent', // Let the overlay handle the background
+    backgroundColor: 'rgba(0, 0, 0, 0.5)', // Add fallback background
   },
   modalContainer: {
     maxHeight: '90%',
-    backgroundColor: '#FFFFFF', // Solid white background
+    backgroundColor: '#FFFFFF', // Ensure solid background
     borderTopLeftRadius: getResponsiveSize(20, 22, 24),
     borderTopRightRadius: getResponsiveSize(20, 22, 24),
     elevation: 20,
@@ -766,7 +767,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Ensure content has solid background
+    backgroundColor: '#FFFFFF', // Critical for mobile visibility
   },
   modalHeader: {
     flexDirection: 'row',
@@ -796,7 +797,7 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     flex: 1,
-    backgroundColor: '#FFFFFF', // Solid background for scroll content
+    backgroundColor: '#FFFFFF', // Critical for content visibility
   },
   modalImageContainer: {
     position: 'relative',
@@ -843,7 +844,7 @@ const styles = StyleSheet.create({
   modalProductInfo: {
     padding: getResponsiveSize(20, 22, 24),
     gap: getResponsiveSize(16, 18, 20),
-    backgroundColor: '#FFFFFF', // Solid background
+    backgroundColor: '#FFFFFF', // Ensure product info visibility
   },
   modalProductName: {
     fontFamily: 'CrimsonPro-SemiBold',
@@ -891,7 +892,7 @@ const styles = StyleSheet.create({
     padding: getResponsiveSize(20, 22, 24),
     borderTopWidth: 1,
     borderTopColor: '#E8EAF6',
-    backgroundColor: '#FFFFFF', // Solid background for actions
+    backgroundColor: '#FFFFFF', // Ensure actions visibility
   },
   modalActionButton: {
     flex: 1,
